@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>设备管理</title>
+		<script type="text/javascript " src="js/echarts.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="easyui/themes/default/easyui.css" />
+		<link rel="stylesheet" type="text/css" href="easyui/themes/icon.css">
+		<script type="text/javascript" src="easyui/jquery.min.js"></script>
+		<script type="text/javascript" src="easyui/jquery.easyui.min.js"></script>
+		<script type="text/javascript" src="easyui/locale/easyui-lang-zh_CN.js"></script>
+		<script src="js/echarts.min.js"></script>
+		<script type="text/javascript">
+			$(function() {
+				$('#dg').datagrid({loadFilter: pagerFilter}).datagrid({
+					url: 'equip/findByPage',   //加载数据
+					title: '设备管理',
+					rownumbers: true,
+					singleSelect: true,  //取消多选
+					autoRowHeight: false,
+					pagination: true,  //分页
+					pageSize: 10,
+					fit: true, //防止水平抖动
+					toolbar: '#tb',
+					fitColumns: true,  //fasle固定宽度  最下方由滚动条  true 默认在最下面
+					columns: [[
+						// {checkbox:true,field:''},
+						{field: 'ename', title: '设备名称', width: 150, editor: 'textbox'},
+						{field: 'sheng', title: '省份', width: 150, editor: 'textbox'},
+						{field: 'xian', title: '县区', width: 100, editor: 'textbox'},
+						{field: 'juti', title: '具体位置', width: 100, editor: 'textbox'}
+					]]
+				});
+
+				function pagerFilter(data) {
+					if (typeof data.length == 'number' && typeof data.splice == 'function') {	// is array
+						data = {
+							total: data.length,
+							rows: data
+						}
+					}
+					var dg = $(this);
+					var opts = dg.datagrid('options');
+					var pager = dg.datagrid('getPager');
+					pager.pagination({
+						onSelectPage: function (pageNum, pageSize) {
+							opts.pageNumber = pageNum;
+							opts.pageSize = pageSize;
+							pager.pagination('refresh', {
+								pageNumber: pageNum,
+								pageSize: pageSize
+							});
+							dg.datagrid('loadData', data);
+						}
+					});
+					if (!data.originalRows) {
+						data.originalRows = (data.list);
+					}
+					var start = (opts.pageNumber - 1) * parseInt(opts.pageSize);
+					var end = start + parseInt(opts.pageSize);
+					data.rows = (data.originalRows.slice(start, end));
+					return data;
+				}
+			});
+		</script>
+	</head>
+	<body style="border: 0px"  >
+
+	<div id="tb">
+		<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true"onclick="$('#w').window('open')">添加</a>
+		<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true" onclick="goUpdate()">修改</a>
+		<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:true" onclick="saveUpdate()">保存</a>
+		<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true" onclick="removeit()">删除</a>
+		<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-refresh',plain:true" onclick="refresh()">刷新</a>
+		<label>设备名称：</label><input id="kinds" style="line-height:26px;border:1px solid #ccc">
+		<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="doSearch()">查找</a>
+	</div>
+	<div id="w" class="easyui-window" title="Modal Window" data-options="modal:true,closed:true,iconCls:'icon-save'" style="width:500px;height:500px;padding:10px;">
+		<iframe src="insert_equip.html" width="100%" height="100%"></iframe>
+	</div>
+	<table id="dg"></table>
+	</body>
+<script type="text/javascript">
+	var index = -1;
+	//进入编辑状态
+	function goUpdate() {
+		//获取选中的行
+		// $("#dg").datagrid("beginEdit",0);
+		var row = $("#dg").datagrid("getSelected");
+		if (row != null) {
+			//将index对应的行关闭编辑状态
+			$("#dg").datagrid("endEdit", index);
+			//获取row对应的index
+			index = $("#dg").datagrid("getRowIndex", row);
+			$("#dg").datagrid("beginEdit", index);
+		} else {
+			alert("操作错误，请勾选要选中的行记录");
+		}
+	}
+
+	function removeit() {
+		var row = $("#dg").datagrid("getSelected");
+		if (row != null) {
+			editIndex = $("#dg").datagrid("getRowIndex", row);
+			if (editIndex == undefined) {
+				return
+			}
+			$('#dg').datagrid('cancelEdit', editIndex)
+					.datagrid('deleteRow', editIndex);
+			editIndex = undefined;
+			var data = {"id": row.id};
+			//将实体类转换为json
+			var datas = JSON.stringify(data);
+			$.ajax({
+				url: 'equip/delete',
+				contentType: "application/json;charset=UTF-8",
+				data: datas,
+				dataType: "json",
+				type: "post",
+				success: function (data) {
+					if (data.msg == 0) {
+						alert("操作出错，请重试");
+					} else {
+						alert("删除成功");
+					}
+				}
+			});
+		} else {
+			alert("请勾选所要删除的行");
+		}
+	}
+
+	var editIndex = undefined;
+	function endEditing() {
+		if (editIndex == undefined) {
+			return true
+		}
+		if ($('#dg').datagrid('validateRow', editIndex)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	function refresh() {
+		$('#dg').datagrid('reload');//刷新数据
+	}
+	//保存修改的数据
+	function saveUpdate(){
+		//获取选中的行
+		var row =$("#dg").datagrid("getSelected");
+		if(row!=null){
+			//获取row对应的index
+			index=$("#dg").datagrid("getRowIndex",row);
+			//结束编辑状态
+			$("#dg").datagrid("endEdit",index)
+			//将修改的数据提交到服务器
+			console.log(row);
+			var data = {
+				"id":row.id,
+				"ename": row.ename,
+				"sheng": row.sheng,
+				"xian": row.xian,
+				"juti": row.juti,
+
+			};
+			//将实体类转换为json
+			var datas = JSON.stringify(data);
+			$.ajax({
+				url: 'equip/update',
+				contentType: "application/json;charset=UTF-8",
+				data: datas,
+				dataType: "json",
+				type: "post",
+				success: function (data) {
+					//alert("访问到这了" + datas);
+
+					if (data.msg == 1) {
+						alert("修改成功！");
+						history.go(0);
+					} else {
+						alert("操作错误，请重新操作！");
+
+					}
+				}
+			});
+		}else{
+			alert("操作错误，请勾选要选中的行记录");
+		}
+	}
+	function doSearch() {
+		var a = $("#kinds").val();
+		var kinds = {"ename": a};
+		var datas = JSON.stringify(kinds);
+
+		$.ajax({
+			url: 'equip/findByName',
+			contentType: "application/json;charset=UTF-8",
+			data: datas,
+			dataType: "json",
+			type: "post",
+			success: function (data) {
+				console.log(data);
+				if (data) {
+					$("#dg").datagrid('loadData', data);
+
+				}
+			}
+		});
+	}
+
+</script>
+</html>

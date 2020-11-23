@@ -1,0 +1,87 @@
+package com.itdfq.model;
+
+import java.io.Serializable;
+
+/**
+ * (Users)实体类
+ *
+ * @author 段方钦
+ * @since 2020-09-16 22:37:13
+ */
+public class Users implements Serializable {
+    private static final long serialVersionUID = 697067225969590764L;
+    
+    private Integer id;
+    
+    private String username;
+    
+    private String password;
+    
+    private String name;
+    
+    private String phone;
+    
+    private String address;
+    /**
+    * 0代表普通用户1代表管理员
+    */
+    private Integer role;
+
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public Integer getRole() {
+        return role;
+    }
+
+    public void setRole(Integer role) {
+        this.role = role;
+    }
+
+}

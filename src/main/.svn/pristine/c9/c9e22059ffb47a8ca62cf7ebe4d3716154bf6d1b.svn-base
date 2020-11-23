@@ -1,0 +1,20 @@
+package com.itdfq.qianduan.service;
+
+import com.itdfq.qianduan.model.User;
+
+/**
+ * Created by DFQ on 2020/10/11 15:01
+ */
+public interface UserService {
+    User login(User users);
+    User resign(User user);
+    /**
+     * 查询用户的角色
+     * @param user
+     * @return
+     */
+    User selectByRole(User user);
+
+
+    User selectByName(User user);
+}

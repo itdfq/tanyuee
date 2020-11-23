@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html  lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>管理后台</title>
+	<link rel="stylesheet" type="text/css"
+		  th:href="@{/static/easyui/themes/default/easyui.css}">
+	<link rel="stylesheet" type="text/css"
+		  th:href="@{/static/easyui/themes/icon.css}">
+	<link rel="stylesheet" type="text/css"
+		  th:href="@{/static/easyui/themes/color.css}">
+	<link rel="stylesheet" type="text/css"
+		  th:href="@{/static/easyui/themes/demo.css}">
+	<script type="text/javascript" th:src="@{/static/easyui/jquery.min.js}"></script>
+	<script type="text/javascript"
+			th:src="@{/static/easyui/jquery.easyui.min.js}"></script>
+	<script type="text/javascript"
+			th:src="@{/static/easyui/locale/easyui-lang-zh_CN.js}"></script>
+<style>
+	html,
+	body {
+		margin: 0;
+		padding: 0;
+	}
+
+	.header {
+		height: 120px;
+		background-color: #3f51b5 !important;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		border-radius: 0 30px 0 30px;
+	}
+
+	.header>.headerLeft {
+		display: flex;
+		padding-left: 15%;
+		font-size: 3.5rem;
+		font-family: "楷体";
+		color: white;
+		justify-content: flex-start;
+		align-items: center;
+		flex: 1;
+	}
+
+	.header>.headerRight {
+		margin-right: 40px;
+		width: 120px;
+		height: 120px;
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+	}
+
+	.header>.headerRight>div,.header>.headerRight>div>a {
+		cursor: pointer;
+		width: 60px;
+		height: 60px;
+		display:flex;
+		align-items: center;
+		justify-content: center;
+		font-size:.8rem;
+		color:rgb(255,255,255);
+		text-decoration: none;
+	}
+
+	.header>.headerRight>div:nth-child(1) {
+		border-radius: 2px 30px 2px 30px;
+		background-color: red;
+		transition: all 0.5s;
+	}
+
+	.header>.headerRight>div:nth-child(2) {
+		border-radius: 30px 2px 30px 2px;
+		background-color: rgb(218, 14, 245);
+	}
+
+	.header>.headerRight>div:nth-child(3) {
+		border-radius: 30px 2px 30px 2px;
+		background-color: blue;
+	}
+
+	.header>.headerRight>div:nth-child(4) {
+		border-radius: 2px 30px 2px 30px;
+		background-color: green;
+	}
+	.header>.headerRight>div:nth-child(1):hover{
+		transform: scale(1.15);
+		box-shadow:10px 10px 10px rgba(0,0,0,.6);
+	}
+	.header>.headerRight>div:nth-child(2):hover{
+		transform: scale(1.15);
+		box-shadow:10px 10px 10px rgba(0,0,0,.6);
+	}
+	.header>.headerRight>div:nth-child(3):hover{
+		transform: scale(1.15);
+		box-shadow:10px 10px 10px rgba(0,0,0,.6);
+	}
+	.header>.headerRight>div:nth-child(4):hover{
+		transform: scale(1.15);
+		box-shadow:10px 10px 10px rgba(0,0,0,.6);
+	}
+	@media (max-width:1000px){
+		.header>.headerLeft{
+			padding-left:5%;
+			font-size: 3rem;
+		}
+	}
+	@media (max-width:700px) {
+		.header > .headerLeft {
+			padding-left: 5%;
+			font-size: 1.8rem;
+			display: flex;
+			justify-content: center;
+			flex-wrap: nowrap;
+		}
+	}
+</style>
+<script type="text/javascript">
+	function addPanel(title, url) {
+		if ($("#tt").tabs('exists', title)) {
+			$("#tt").tabs('select', title);
+		} else {
+			var content = '<iframe scrolling="auto" frameborder="0"  src="' + url + '" style="width:100%;height:100%;"></iframe>';
+			$("#tt").tabs('add', {
+				title : title,
+				content : content,
+				closable : true
+			});
+		}
+
+	}
+
+	function logout() {
+
+		$.messager.confirm('退出', '您确定要退出本系统吗?', function(r) {
+			if (r)
+				location.href = '${pageContext.request.contextPath}/logout';
+		})
+	}
+	
+	function passwordModifyOpen(){
+		$('#frPwd').form('clear');
+		$('#dlgPwd').dialog('open').dialog('center');
+		
+	}
+	function passwordModify(){
+		
+		var password = $('#password').val();
+		var password1 = $('#password1').val();
+		var password2 = $('#password2').val();
+		
+		if(password==""){
+			$.messager.alert("提示", "原密码不能为空！");
+			return;
+		}
+		
+		if(password1==""){
+			$.messager.alert("提示", "新密码不能为空！");
+			return;
+		}
+		if(password2==""){
+			$.messager.alert("提示", "确认新密码不能为空！");
+			return;
+		}
+		if(password1!=password2){
+			$.messager.alert("提示", "新密码与确认新密码不一致！");
+			return;
+		}
+		
+		$.ajax({
+			url:'/user/passwordModify',
+			data : $('#frPwd').serialize(),
+			success:function(map){
+				if(map.msg=="-1"){
+					$.messager.alert({
+						title:'提示',
+						msg:'登录已过期，请重新登录后再修改密码！'
+					});
+					return ;
+				}
+				if(map.msg=="-2"){
+					$.messager.alert({
+						title:'提示',
+						msg:'原密码不正确！'
+					});
+					return ;
+				}
+				if(map.msg=="1"){
+					$.messager.alert({
+						title:'成功提示',
+						msg:'密码修改成功'
+					});
+					$('#dlgPwd').dialog('close');
+					//tableReload();
+					//$('#table').datagrid('reload');
+					//$('#table').datagrid('clearSelections');
+
+				}else{
+					$.messager.alert({
+						title:'异常提示',
+						msg:'密码修改失败：'+map.msg
+					});
+				}
+			}
+		});
+	}
+	function logout() {
+		window.location.href = "/logout";
+	}
+</script>
+</head>
+<body class="easyui-layout">
+	<div data-options="region:'north',border:false" style="height: 135px;background: #B3DFDA; padding: 10px; font-size: 24px;overflow-x: hidden;overflow-y: hidden;">
+<!--		<div style="float: left;width:500px;line-height: 58px;vertical-align:middle;  text-align: center">贪夜蛾自动检测云平台（管理后台）</div>-->
+<!--		<div style="float: right;line-height: 58px; vertical-align:middle;text-align:bottom;font-size: 16px;">用户：<span th:text="${session.user.username}"></span>,<span th:text="${session.user.role}"></span>-->
+<!--				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:logout()">退出系统</a>&nbsp;&nbsp;&nbsp;&nbsp;-->
+<!--		</div>-->
+		<div class="header">
+			<div class="headerLeft">
+				贪夜蛾自动检测云平台（管理后台）
+			</div>
+			<div class='headerRight animated bounceInDown'>
+				<div> 用户名 :</div>
+				<div th:if="${session.user}" ><span th:text="${session.user.realName}"/></div>
+				<div></div>
+				<div><a href="#" onclick="logout()">退出登录</a></div>
+			</div>
+		</div>
+	</div>
+
+	<div data-options="region:'west',split:true,title:'菜单'"
+		style="width: 200px; height: 100px;overflow: hidden; ">
+		<div class="easyui-accordion"
+			style="width: 192px; height: 100%; ">
+			<div title="业务功能" data-options="iconCls:'icon-ok'"
+				style="overflow: hidden; paddding-top: 10px; padding-left: 20px;">
+				<div>
+					<a href="javascript:void(0)" class="easyui-linkbutton"
+						data-options="plain:true,iconCls:'icon-man'"
+						onclick="addPanel('用戶管理','/user');">用戶管理</a>
+					<a href="javascript:void(0)" class="easyui-linkbutton"
+						data-options="plain:true,iconCls:'icon-man'"
+						onclick="addPanel('设备管理','/equipment');">设备管理 </a>
+					<a href="javascript:void(0)" class="easyui-linkbutton"
+						data-options="plain:true,iconCls:'icon-man'"
+						onclick="addPanel('权限管理','/authority');">权限管理 </a>
+				</div>
+			</div>
+				
+			<div title="系统管理" data-options="iconCls:'icon-man'"
+				style="overflow: hidden; paddding-top: 10px; padding-left: 20px;">
+				<div>
+					<a href="javascript:void(0)" class="easyui-linkbutton"
+						data-options="plain:true,iconCls:'icon-man'"
+						onclick="passwordModifyOpen();">密码修改 </a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div data-options="region:'south',border:false"
+		style="height: 36px; text-align: center; background: #A9FACD; padding: 10px;">
+		安阳工学院 山猫科技</div>
+	<div data-options="region:'center'" style="overflow-y: hidden;">
+		<div id="tt" class="easyui-tabs" style="width: 100%; height: 100%;overflow-y: hidden;">
+			<div title="欢迎页" iconCls="icon-ok"
+				style="padding: 5px 10px; display: block">
+				<h1 align="center">欢迎进入！</h1>
+			</div>
+		</div>
+	</div>
+	
+	<!-- 添加弹出框 -->
+	<div id="dlgPwd" class="easyui-dialog" title="密码修改"
+		data-options="iconCls:'icon-save',modal:true,closed: true"
+		style="width: 400px; height: 250px; padding: 10px"
+		buttons='#add-buttons'>
+		<form id="frPwd">
+			<table cellpadding="5">
+				<tr>
+					<td>原密码:</td>
+					<td><input class="easyui-textbox" type="password" id="password" name="password"
+						data-options="required:true"></input></td>
+				</tr>
+				<tr>
+					<td>新密码:</td>
+					<td><input class="easyui-textbox" type="password" id='password1' name="password1"  data-options="required:true"></input></td>
+				</tr>	
+				<tr>
+					<td>确认新密码:</td>
+					<td><input class="easyui-textbox" type="password" id='password2' name="password2"  data-options="required:true"></input></td>
+
+				</tr>						
+	    	</table>
+	    	<input type="hidden" name="id">
+		</form>
+	</div>
+	<div id="add-buttons">
+		<a href="javascript:void(0)" class="easyui-linkbutton"
+			onclick="passwordModify();">密码修改</a>
+		<a href="javascript:void(0)" class="easyui-linkbutton"
+			onclick="javascript:$('#dlgPwd').dialog('close')">关 闭</a>
+	</div>
+</body>
+</html>

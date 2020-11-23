@@ -1,0 +1,36 @@
+package com.itdfq.qianduan.dao;
+
+import com.itdfq.qianduan.model.User;
+
+/**
+ * Created by DFQ on 2020/10/11 14:29
+ */
+public interface UserDao {
+    /**
+     * 用户登录
+     * @param user
+     * @return user
+     */
+    User login(User user);
+
+    /**
+     * 用户注册
+     * @param user
+     * @return
+     */
+    User resign(User user);
+
+    /**
+     * 查询用户的角色
+     * @param user
+     * @return
+     */
+    User selectByRole(User user);
+
+    /**
+     * 查询用户名是否为空
+     * @param user
+     * @return
+     */
+    User selectByName(User user);
+}

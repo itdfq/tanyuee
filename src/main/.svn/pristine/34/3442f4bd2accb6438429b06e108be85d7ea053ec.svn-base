@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html  lang="en" xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta charset="UTF-8">
+		<title>设备管理</title>
+		<link rel="stylesheet" type="text/css"
+			  th:href="@{/static/easyui/themes/default/easyui.css}">
+		<link rel="stylesheet" type="text/css"
+			  th:href="@{/static/easyui/themes/icon.css}">
+		<link rel="stylesheet" type="text/css"
+			  th:href="@{/static/easyui/themes/color.css}">
+		<script type="text/javascript" th:src="@{/static/easyui/jquery.min.js}"></script>
+		<script type="text/javascript"
+				th:src="@{/static/easyui/jquery.easyui.min.js}"></script>
+		<script type="text/javascript"
+				th:src="@{/static/easyui/locale/easyui-lang-zh_CN.js}"></script>
+		<script type="text/javascript">
+			$(function() {
+				$('#table').datagrid({
+					url : '/equipment/find',
+					queryParams : {
+						equipNo : $('#equipNo').val(),
+						equipName:$('#equipName').val()
+					},
+					pagination : true,
+					pageSize:20,
+					pageList:[20,50,100,200],
+					fit : true,
+					singleSelect : true
+				});
+			});
+
+			//打开用户添加对话框
+			function addOpen() {
+				$('#formAdd').form('clear');
+				$('#dlgAdd').dialog('open').dialog('center');
+			}
+			//用户添加
+			function add() {
+				alert($('#formAdd').serialize());
+
+				$.ajax({
+					url:'/equipment/add',
+					data : $('#formAdd').serialize(),
+					success:function(map){
+						if(map.msg=="1"){
+							$.messager.alert({
+								title:'成功提示',
+								msg:'设备添加成功'
+							});
+							$('#dlgAdd').dialog('close');
+							//tableReload();
+							$('#table').datagrid('reload');
+							$('#table').datagrid('clearSelections');
+
+						}else{
+							$.messager.alert({
+								title:'异常提示',
+								msg:'设备添加失败：'+map.msg
+							});
+						}
+					}
+				});
+			}
+			//打开用户修改对话框
+			function modifyOpen() {
+				var row = $('#table').datagrid('getSelected');//获取选中行
+				if (!row) {
+					$.messager.alert("选择提示", "请选择您要修改的记录！");
+					return;
+				}
+				$('#formMod').form('load', row);
+				$('#dlgMod').dialog('open').dialog('center');
+			}
+			//用户修改
+			function modify() {
+				$.ajax({
+					url:'/equipment/modify',
+					method:'post',
+					data : $('#formMod').serialize(),
+					success:function(map){
+						if(map.msg=="1"){
+							$.messager.alert({
+								title:'成功提示',
+								msg:'设备修改成功'
+							});
+							$('#dlgMod').dialog('close');
+							$('#table').datagrid('reload');
+							//tableReload();
+							$('#table').datagrid('clearSelections');
+
+						}else{
+							$.messager.alert({
+								title:'异常提示',
+								msg:'设备修改失败：'+map.msg
+							});
+						}
+					}
+				});
+			}
+			//用户删除
+			function remove() {
+				var row = $('#table').datagrid('getSelected');//获取选中行
+				if (!row) {
+					$.messager.alert("删除提示", "请选择您要删除的设备记录！");
+					return;
+				}
+
+				$.ajax({
+					url:'/equipment/remove',
+					data:{
+						id:row.id
+					},
+					success:function(map){
+						if(map.msg=="1"){
+							$.messager.alert({
+								title:'成功提示',
+								msg:'设备删除成功'
+							});
+							$('#table').datagrid('reload');
+							//tableReload();
+							$('#table').datagrid('clearSelections');
+
+						}else{
+							$.messager.alert({
+								title:'异常提示',
+								msg:'设备添加失败：'+map.msg
+							});
+						}
+					},
+					error:function(){
+					}
+				});
+			}
+
+			function query(){
+				var queryParams = $('#table').datagrid('options').queryParams;
+				queryParams.equipNo = $('#equipNo').val();
+				queryParams.equipName = $('#equipName').val();
+				$('#table').datagrid('options').queryParams = queryParams;
+				$('#table').datagrid('reload');
+			}
+
+		</script>
+	</head>
+	<body>
+
+
+	<table id="table" toolbar="#toolbar">
+		<thead>
+		<tr>
+			<th data-options="field:'ck',checkbox:true"></th>
+			<th data-options="field:'equipNo',width:200">设备编号</th>
+			<th data-options="field:'equipName',width:200">设备名称</th>
+			<th data-options="field:'address',width:300">设备地址</th>
+			<th data-options="field:'remark',width:300">备注</th>
+		</tr>
+		</thead>
+	</table>
+
+	<div id="toolbar">
+		<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true"onclick="addOpen()">添 加</a>
+		<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true" onclick="modifyOpen()">修 改</a>
+		<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true" onclick="remove()">删 除</a>
+		<label>设备编号：</label><input class="easyui-textbox" id="equipNo" style="line-height:26px;border:1px solid #ccc">
+		<label>设备名称：</label><input class="easyui-textbox" id="equipName" style="line-height:26px;border:1px solid #ccc">
+		<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="query()">查询</a>
+	</div>
+
+
+	<!-- 添加弹出框 -->
+	<div id="dlgAdd" class="easyui-dialog" title="设备添加"
+		 data-options="iconCls:'icon-save',modal:true,closed: true"
+		 style="width: 300px; height: 400px; padding: 10px"
+		 buttons='#add-buttons'>
+		<form id="formAdd">
+			<table cellpadding="5">
+				<tr>
+					<td>设备编号:</td>
+					<td><input class="easyui-textbox" type="text" name="equipNo"
+							   data-options="required:true"></input></td>
+				</tr>
+				<tr>
+					<td>设备名称:</td>
+					<td><input class="easyui-textbox" type="text" name="equipName"></input></td>
+				</tr>
+				<tr>
+					<td>设备地址:</td>
+					<td><input class="easyui-textbox" type="text" name="address"></input></td>
+				</tr>
+				<tr>
+					<td>备注:</td>
+					<td><input class="easyui-textbox" type="text" name="remark"></input></td>
+				</tr>
+			</table>
+		</form>
+	</div>
+	<div id="add-buttons">
+		<a href="javascript:void(0)" class="easyui-linkbutton"
+		   onclick="add();">保 存</a>
+		<a href="javascript:void(0)" class="easyui-linkbutton"
+		   onclick="javascript:$('#dlgAdd').dialog('close')">关 闭</a>
+	</div>
+	<!-- 修改弹出框 -->
+	<div id="dlgMod" class="easyui-dialog" title="用户修改"
+		 data-options="iconCls:'icon-save',modal:true,closed: true"
+		 style="width:300px;height:400px;padding:10px" buttons="#mod-buttons">
+		<form id="formMod">
+			<table cellpadding="5">
+				<tr>
+					<td>设备编号:</td>
+					<td><input class="easyui-textbox" type="text" name="equipNo"
+							   data-options="required:true"></input></td>
+				</tr>
+				<tr>
+					<td>设备名称:</td>
+					<td><input class="easyui-textbox" type="text" name="equipName"></input></td>
+				</tr>
+				<tr>
+					<td>设备地址:</td>
+					<td><input class="easyui-textbox" type="text" name="address"></input></td>
+				</tr>
+				<tr>
+					<td>备注:</td>
+					<td><input class="easyui-textbox" type="text" name="remark"></input></td>
+				</tr>
+			</table>
+			<input type="hidden" name="id">
+		</form>
+	</div>
+	<div id="mod-buttons">
+		<a href="javascript:void(0)" class="easyui-linkbutton"
+		   onclick="modify();">保 存</a>
+		<a href="javascript:void(0)" class="easyui-linkbutton"
+		   onclick="javascript:$('#dlgMod').dialog('close')">关 闭</a>
+	</div>
+	</body>
+</html>

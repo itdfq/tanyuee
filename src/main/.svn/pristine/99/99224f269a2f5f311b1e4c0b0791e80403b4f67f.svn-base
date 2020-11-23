@@ -1,0 +1,14 @@
+package com.itdfq.qianduan.service;
+
+
+import com.github.pagehelper.PageInfo;
+import com.itdfq.qianduan.model.Yujing;
+
+public interface YujingService {
+    //分页查询
+    PageInfo<Yujing> findByPage(int pageNum, int pageSize);
+    //通过id删除
+    void delete(Yujing id);
+    //添加
+    void insert(Yujing yujing);
+}

@@ -1,0 +1,56 @@
+package com.itdfq.controller;
+
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageInfo;
+import com.itdfq.model.Yujing;
+import com.itdfq.service.YujingService;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
+@RequestMapping("yujing")
+public class YujingController {
+
+    private Map<String,Object> map = new HashMap<>();
+
+    @Autowired
+    private YujingService yujingService;
+
+    @RequestMapping("/findByPage")
+    @ApiOperation("分页查询")
+    public PageInfo<Yujing> findByPage(@ApiParam("页号") @RequestParam(defaultValue = "1") Integer pageNum,
+                                       @ApiParam("每页大小") @RequestParam(defaultValue = "15") Integer pageSize) {
+        return  yujingService.findByPage(pageNum,pageSize);
+    }
+    @RequestMapping("/find")
+    public String abc(){
+        return "你好哇";
+    }
+
+    @RequestMapping("/delete")
+    @ApiOperation("通过ID删除单个")
+    public Map<String,Object> deleteById(@RequestBody Yujing id) {
+        map.clear();
+        System.out.println(id);
+        try {
+            yujingService.delete(id);
+            map.put("msg",1);
+        } catch (Exception e) {
+            map.put("msg",e.getMessage());
+            e.printStackTrace();
+        }
+        return map;
+    }
+    @RequestMapping("/insert")
+    @ApiOperation("添加数据")
+    public  void insert(@RequestBody Yujing yujing){
+        yujingService.insert(yujing);
+    }
+
+}

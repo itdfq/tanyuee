@@ -1,0 +1,72 @@
+package com.itdfq.controller;
+
+import com.github.pagehelper.PageInfo;
+import com.itdfq.model.Datas;
+import com.itdfq.service.DatasService;
+
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.web.bind.annotation.*;
+
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+/**
+ *
+ */
+@RestController
+@RequestMapping("/datass")
+public class DatasController {
+
+    @Autowired
+    private DatasService datasService;
+
+
+    private Map<String,Object> map = new HashMap<>();
+
+    @RequestMapping("/selectAll")
+    @ApiOperation("查询所有")
+    public List<Datas> selectAll(Map map){
+        return datasService.selectAll(map);
+    }
+
+    @RequestMapping("/findByPage")
+    @ApiOperation("分页查询")
+    public PageInfo<Datas> findByPage(@ApiParam("页号") @RequestParam(defaultValue = "1") Integer pageNum,
+                                      @ApiParam("每页大小") @RequestParam(defaultValue = "15") Integer pageSize) {
+//        Date data = new Date();
+//        SimpleDateFormat formatter = new SimpleDateFormat("y-M-d");
+//        String str1 = formatter.format(data);
+//        System.out.println(str1);
+//        System.out.println(datasService.findByPage(pageNum, pageSize));
+        return datasService.findByPage(pageNum, pageSize);
+    }
+    @ApiOperation("条件查询")
+    @RequestMapping("/findByTJ")
+    public PageInfo<Datas> findByTJ(@ApiParam("页号") @RequestParam(defaultValue = "1") Integer pageNum,
+                                      @ApiParam("每页大小") @RequestParam(defaultValue = "15") Integer pageSize,@RequestBody Datas datas) {
+        //System.out.println(datas);
+//        System.out.println(datasService.findByTJ(pageNum,pageSize,datas,startTime,endTime));
+        return datasService.findByTJ(pageNum,pageSize,datas);
+    }
+
+    @PostMapping
+    @ApiOperation("新增")
+    public void insert(@RequestBody Datas datas) {
+        datasService.insert(datas);
+    }
+
+    @PutMapping
+    @ApiOperation("修改")
+    public void update(@RequestBody Datas datas) {
+        datasService.update(datas);
+    }
+
+    @DeleteMapping("/{id}")
+    @ApiOperation("通过ID删除单个")
+    public void deleteById(@ApiParam("ID") @PathVariable("id") Integer id) {
+        datasService.deleteById(id);
+    }
+}

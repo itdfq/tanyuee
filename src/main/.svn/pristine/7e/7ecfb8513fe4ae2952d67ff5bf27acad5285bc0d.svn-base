@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itdfq.qianduan.dao.DatasDAO">
+    <resultMap id="datasMap" type="com.itdfq.qianduan.model.Datas">
+        <id property="id" column="id"/>
+        <result property="nowtime" column="nowtime"/>
+        <result property="hongwai" column="hongwai"/>
+        <result property="fengxiang" column="fengxiang"/>
+        <result property="fengsu" column="fengsu"/>
+        <result property="wendu" column="wendu"/>
+        <result property="shidu" column="shidu"/>
+        <result property="pm" column="PM"/>
+        <result property="tWendu10" column="t_wendu10"/>
+        <result property="tShidu10" column="t_shidu10"/>
+        <result property="tWendu20" column="t_wendu20"/>
+        <result property="tShidu20" column="t_shidu20"/>
+        <result property="tWendu30" column="t_wendu30"/>
+        <result property="tShidu30" column="t_shidu30"/>
+        <result property="shebei" column="shebei"/>
+        <result property="startTime" column="startTime"/>
+        <result property="endTime" column="endTime"/>
+    </resultMap>
+
+    <!--分页条件查询单个-->
+    <select id="findByTJ" resultMap="datasMap">
+        SELECT * FROM datas
+        <where>
+            <if test="shebei!=null and shebei!=''">
+                shebei = #{shebei}
+            </if>
+            <if test="startTime!=null and startTime!='' ">
+                and nowtime  <![CDATA[>= ]]> #{startTime}
+            </if>
+            <if test="endTime!=null and endTime!=''">
+                and   #{endTime}  <![CDATA[>= ]]> nowtime
+            </if>
+        </where>
+    </select>
+
+    <!--分页查询-->
+    <!--    默认显示当前七天的数据-->
+    <select id="findByPage" resultMap="datasMap">
+        SELECT * FROM datas where  nowtime >=DATE_SUB(CURDATE(),INTERVAL 7 DAY )
+    </select>
+    <!--新增-->
+    <insert id="insert">
+        INSERT INTO datas(nowtime,hongwai,fengxiang,fengsu,wendu,shidu,PM,t_wendu10,t_shidu10,t_wendu20,t_shidu20,t_wendu30,t_shidu30,shebei)
+        VALUES (#{nowtime},#{hongwai},#{fengxiang},#{fengsu},#{wendu},#{shidu},#{pm},#{tWendu10},#{tShidu10},#{tWendu20},#{tShidu20},#{tWendu30},#{tShidu30},#{shebei})
+    </insert>
+<!--    查询所有图像的-->
+    <select id="selectAll" resultMap="datasMap">
+        SELECT * FROM datas
+    </select>
+    <!--修改-->
+    <update id="update">
+        UPDATE datas SET nowtime=#{nowtime},hongwai=#{hongwai},fengxiang=#{fengxiang},fengsu=#{fengsu},wendu=#{wendu},shidu=#{shidu},PM=#{pm},t_wendu10=#{tWendu10},t_shidu10=#{tShidu10},t_wendu20=#{tWendu20},t_shidu20=#{tShidu20},t_wendu30=#{tWendu30},t_shidu30=#{tShidu30},shebei=#{shebei}
+        WHERE id=#{id}
+    </update>
+    <!--通过ID删除单个-->
+    <delete id="deleteById">
+        DELETE FROM datas
+        WHERE id=#{id}
+    </delete>
+
+</mapper>

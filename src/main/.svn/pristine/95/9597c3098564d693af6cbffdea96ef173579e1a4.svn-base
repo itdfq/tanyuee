@@ -1,0 +1,15 @@
+package com.nl.core.web;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.stereotype.Controller;
+
+import com.nl.core.service.LogBean;
+
+@Controller
+public class BasicController extends LogBean {
+	
+	protected Map<String, Object> map = new HashMap<String, Object>();
+
+}

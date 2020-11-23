@@ -1,0 +1,14 @@
+package com.itdfq.qianduan.dao;
+
+
+import com.github.pagehelper.Page;
+import com.itdfq.qianduan.model.Yujing;
+
+public interface YujingDao {
+    //分页查询
+    Page<Yujing> findByPage();
+    //通过id删除
+    void delete(Yujing id);
+    //添加
+    void insert(Yujing yujing);
+}

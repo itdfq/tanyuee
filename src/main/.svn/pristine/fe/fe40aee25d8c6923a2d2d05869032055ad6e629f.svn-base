@@ -1,0 +1,59 @@
+package com.itdfq.qianduan.controller;
+
+
+
+import com.github.pagehelper.PageInfo;
+import com.itdfq.qianduan.model.Datas;
+import com.itdfq.qianduan.service.DatasService;
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.web.bind.annotation.*;
+
+import java.util.*;
+
+
+@RestController
+@RequestMapping("/datass")
+public class DatasController {
+
+    @Autowired
+    private DatasService datasService;
+
+    private Map<String,Object> map = new HashMap<>();
+
+    @RequestMapping("/selectAll")
+    public List<Datas> selectAll(Map map){
+        return datasService.selectAll(map);
+    }
+
+    @RequestMapping("/findByPage")
+    public PageInfo<Datas> findByPage( @RequestParam(defaultValue = "1") Integer pageNum,
+                                      @RequestParam(defaultValue = "15") Integer pageSize) {
+
+        return datasService.findByPage(pageNum, pageSize);
+    }
+    @RequestMapping("/findByTJ")
+    public PageInfo<Datas> findByTJ( @RequestParam(defaultValue = "1") Integer pageNum,
+                                       @RequestParam(defaultValue = "15") Integer pageSize,@RequestBody Datas datas) {
+        //System.out.println(datas);
+//        System.out.println(datasService.findByTJ(pageNum,pageSize,datas,startTime,endTime));
+        return datasService.findByTJ(pageNum,pageSize,datas);
+    }
+
+    @PostMapping
+    public void insert(@RequestBody Datas datas) {
+        datasService.insert(datas);
+    }
+
+    @PutMapping
+    public void update(@RequestBody Datas datas) {
+        datasService.update(datas);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteById( @PathVariable("id") Integer id) {
+        datasService.deleteById(id);
+    }
+}

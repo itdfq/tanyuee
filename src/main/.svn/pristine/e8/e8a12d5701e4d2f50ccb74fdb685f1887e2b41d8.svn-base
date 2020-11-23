@@ -1,0 +1,43 @@
+package com.itdfq.qianduan.service;
+
+import com.github.pagehelper.PageInfo;
+import com.itdfq.qianduan.model.Datas;
+import com.itdfq.qianduan.model.Equipment;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Created by DFQ on 2020/10/11 16:11
+ */
+public interface EquipmentService {
+    /**
+     * 分页条件查询
+     * @param pageNum
+     * @param pageSize
+     * @param equipment
+     * @return
+     */
+    PageInfo<Equipment> findByName(int pageNum, int pageSize, Equipment equipment);
+    /**
+     * 分页查询
+     *
+     * @param pageNum  页号
+     * @param pageSize 每页大小
+     */
+    PageInfo<Equipment> findByPage(int pageNum, int pageSize);
+    /**
+     * 新增
+     */
+    void insert(Equipment equipment);
+    /**
+     * 修改
+     */
+    void update(Equipment equipment);
+
+    /**
+     * 通过ID删除单个
+
+     */
+    void deleteById(Equipment equipment);
+}

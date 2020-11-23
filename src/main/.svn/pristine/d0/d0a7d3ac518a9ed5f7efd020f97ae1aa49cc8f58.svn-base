@@ -1,0 +1,51 @@
+package com.itdfq.qianduan.controller;
+
+import com.itdfq.qianduan.model.User;
+import com.itdfq.qianduan.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Created by DFQ on 2020/10/11 15:21
+ */
+@RestController
+@RequestMapping("/user")
+public class UserController {
+    @Autowired
+    private UserService userService;
+
+    Map<String,Object> map = new HashMap<>();
+
+    @RequestMapping("/login")
+    public Map<String,Object> login(@RequestBody User user){
+        map.clear();
+        try {
+            User login = userService.login(user);
+            map.put("msg",1);
+            map.put("name",login.getUnit());
+            map.put("role",login.getRole());
+        } catch (Exception e) {
+            e.printStackTrace();
+            map.put("msg",e.getMessage());
+        }
+        return map;
+    }
+//    public Map<String,Object> selectByName(@RequestBody User user){
+//        map.clear();
+//        try {
+//            userService.selectByName(user);
+//            map.put("msg",1);
+//            map.put("role",user.get)
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
+
+}

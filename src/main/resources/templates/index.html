@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html  lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<!--    <meta http-equiv="X-UA-Compatible" content="IE=7">-->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>贪夜蛾自动检测云系统</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/animate.css/4.1.1/animate.compat.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" th:href="@{/static/easyui/themes/default/easyui.css}" />
+    <link rel="stylesheet" type="text/css" th:href="@{/static/easyui/themes/icon.css}">
+    <script type="text/javascript" th:src="@{/static/easyui/jquery.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/easyui/jquery.easyui.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/easyui/locale/easyui-lang-zh_CN.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/echarts.min.js}"></script>
+
+    <style>
+        /*#header{*/
+        /*    width:100%;*/
+        /*    min-height: 150px;*/
+        /*    heigth:150px;*/
+        /*    background-color: #1da1f2;*/
+        /*    padding: 0px;*/
+        /*    margin:0px;*/
+        /*}*/
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            height: 120px;
+            background-color: #3f51b5 !important;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 0 30px 0 30px;
+        }
+
+        .header>.headerLeft {
+            display: flex;
+            padding-left: 15%;
+            font-size: 3.5rem;
+            font-family: "楷体";
+            color: white;
+            justify-content: flex-start;
+            align-items: center;
+            flex: 1;
+        }
+
+        .header>.headerRight {
+            margin-right: 40px;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+
+        .header>.headerRight>div,.header>.headerRight>div>a {
+            cursor: pointer;
+            width: 60px;
+            height: 60px;
+            display:flex;
+            align-items: center;
+            justify-content: center;
+            font-size:.8rem;
+            color:rgb(255,255,255);
+            text-decoration: none;
+        }
+
+        .header>.headerRight>div:nth-child(1) {
+            border-radius: 2px 30px 2px 30px;
+            background-color: red;
+            transition: all 0.5s;
+        }
+
+        .header>.headerRight>div:nth-child(2) {
+            border-radius: 30px 2px 30px 2px;
+            background-color: rgb(218, 14, 245);
+        }
+
+        .header>.headerRight>div:nth-child(3) {
+            border-radius: 30px 2px 30px 2px;
+            background-color: blue;
+        }
+
+        .header>.headerRight>div:nth-child(4) {
+            border-radius: 2px 30px 2px 30px;
+            background-color: green;
+        }
+        .header>.headerRight>div:nth-child(1):hover{
+            transform: scale(1.15);
+            box-shadow:10px 10px 10px rgba(0,0,0,.6);
+        }
+        .header>.headerRight>div:nth-child(2):hover{
+            transform: scale(1.15);
+            box-shadow:10px 10px 10px rgba(0,0,0,.6);
+        }
+        .header>.headerRight>div:nth-child(3):hover{
+            transform: scale(1.15);
+            box-shadow:10px 10px 10px rgba(0,0,0,.6);
+        }
+        .header>.headerRight>div:nth-child(4):hover{
+            transform: scale(1.15);
+            box-shadow:10px 10px 10px rgba(0,0,0,.6);
+        }
+        #yujing{
+            width:100%;
+            padding-top: 10px;
+            background-color: #e0ecff;
+        }
+
+        #condition{
+            width:100%;
+            heigth:50px;
+            padding: 10px;
+            padding-top: 10px;
+            background-color: #3be8b0;
+        }
+
+        #datas{
+            width:100%;
+            padding: 10px;
+            padding-top: 10px;
+            padding-bottom: 10px;
+            background-color: #f8f8ff;
+        }
+        table
+        {
+            border-collapse:collapse;
+            width:100%;
+            text-align:center;
+            border:1px solid green;
+        }
+        table, th, td
+        {
+            border: 1px solid black;
+        }
+        @media (max-width:1000px){
+            .header>.headerLeft{
+                padding-left:5%;
+                font-size: 3rem;
+            }
+        }
+        @media (max-width:700px) {
+            .header > .headerLeft {
+                padding-left: 5%;
+                font-size: 1.8rem;
+                display: flex;
+                justify-content: center;
+                flex-wrap: nowrap;
+            }
+        }
+    </style>
+
+    <script type="text/javascript">
+        $(function() {
+            //加载名下设备
+            $('#equipId ').combobox({
+                url: '/equipment/listPermissionBySessionUser',
+                valueField: 'id',
+                textField: 'equipNo',
+                onLoadSuccess:function () {
+                    var data = $('#equipId ').combobox('getData');//获取所有下拉框数据
+                    if (data.length > 0) {
+                        //如果有数据的话默认选中第一条数据
+                        $('#equipId ').combobox('select',data[0].id);
+                    }
+                    loadDatas();
+                }
+            });
+            //加载预警信息
+            loadYujing();
+            //时间默认值
+            var sevenDay = getDay(-7);
+            $('#startTime').datebox('setValue',sevenDay);
+            var today = getDay(0);
+            $('#endTime').datebox('setValue', today);
+        });
+        function loadYujing(){
+            $.ajax({
+                url:'/yujing/findByUserId',
+                success:function (map) {
+                    if(map.msg == "1"){
+                        var ls = map.ls;
+                        $("#tbYujing tr:not(:first)").empty();
+                        for(i=0;i<ls.length;i++){
+                            var dt = ls[i];
+                            $('#tbYujing').append("<tr><td>"+dt.equipNo+"</td><td>"+dt.name+"</td><td>"+dt.dengji+"</td><td>"+dt.time+"</td>" +
+                                "<td><button onclick='remove("+dt.id+")'>清除</button></td></tr>");
+                        }
+                    }else{
+                        $.messager.alert({
+                            title:'提示',
+                            msg:'读取数据异常：'+map.msg
+                        });
+                        return ;
+                    }
+                }
+            });
+        }
+
+        //加载采集数据
+        function loadDatas() {
+            var startTime = $('#startTime').val();
+            var endTime = $('#endTime').val();
+            var equipId= $('#equipId').combobox("getValue");
+
+            if(!startTime){
+                $.messager.alert({
+                    title:'提示',
+                    msg:'起始时间不能为空！'
+                });
+                return ;
+            }
+
+            if(!endTime){
+                $.messager.alert({
+                    title:'提示',
+                    msg:'结束时间不能为空！'
+                });
+                return ;
+            }
+
+            if(!equipId){
+                $.messager.alert({
+                    title:'提示',
+                    msg:'设备不能为空！'
+                });
+                return ;
+            }
+
+            $.ajax({
+                url:'/datass/findByCondition',
+                data:{
+                    startTime:startTime,
+                    endTime:endTime,
+                    equipId:equipId
+                },
+                success:function (map) {
+                    if(map.msg == "1"){
+                        var ls = map.ls;
+
+                        //表格加载数据
+                        $("#tbDatas tr:not(:first)").empty();
+                        for(i=0;i<ls.length;i++){
+                            var dt = ls[i];
+                            $('#tbDatas').append("<tr><td>"+dt.equipNo+"</td><td>"+dt.nowtime+"</td><td>" +
+                                dt.hongwai+"</td><td>"+dt.fengxiang+"</td><td>"+dt.fengsu+"</td><td>"+dt.wendu+"</td><td>"+dt.shidu+"</td><td>" +
+                                dt.pm+"</td><td>"+dt.tWendu10+"</td><td>"+dt.tWendu10+"</td><td>"+dt.tWendu20+"</td><td>"+dt.tWendu20+"</td><td>"+dt.tWendu30+"</td><td>"+dt.tWendu30+"</td></tr>");
+                        }
+                        //加载图
+                        var myChart = echarts.init(document.getElementById('main'));
+                        // 显示标题，图例和空的坐标轴
+                        myChart.setOption({
+                            title: {
+                                text: ''
+                            },
+                            tooltip: {
+                                trigger: 'axis', //触发类型；轴触发，axis则鼠标hover到一条柱状图显示全部数据，item则鼠标hover到折线点显示相应数据，
+                                axisPointer: {  //坐标轴指示器，坐标轴触发有效，
+                                    type: 'line', //默认为line，line直线，cross十字准星，shadow阴影
+                                    crossStyle: {
+                                        color: '#fff'
+                                    }
+                                }
+                            },
+                            legend: {
+                                data:['红外计数','PM2.5','温度','湿度'],
+                                selectedMode: 'single'   //single每次显示一条数据  multiple多个显示
+                            },
+                            xAxis: {
+                                boundaryGap: false,
+                                data: []
+                            },
+                            grid: {
+                                left: '3%',
+                                right: '4%',
+                                bottom: '3%',
+                                containLabel: true
+                            },
+                            toolbox: {
+                                feature: {
+                                    saveAsImage: {}
+                                }
+                            },
+                            yAxis: {
+                                scale:true
+                            },
+                            series: [{
+                                name: '红外计数',
+                                type: 'line',
+                                data: []
+                            },{
+                                name: 'PM2.5',
+                                type: 'line',
+                                data: []
+                            },{
+                                name: '温度',
+                                type: 'line',
+                                data: []
+                            },{
+                                name: '湿度',
+                                type: 'line',
+                                data: []
+                            }]
+                        });
+                        //浏览器自适应
+                        window.addEventListener("resize", function () {
+                            myChart.resize();
+                        });
+                        //获取日期getDay(-7) 七天之前的日期
+                        function getDay(day){
+                            var today = new Date();
+                            var targetday_milliseconds=today.getTime() + 1000*60*60*24*day;
+                            today.setTime(targetday_milliseconds); //注意，这行是关键代码
+                            var tYear = today.getFullYear();
+                            var tMonth = today.getMonth();
+                            var tDate = today.getDate();
+                            tMonth = doHandleMonth(tMonth + 1);
+                            tDate = doHandleMonth(tDate);
+                            return tYear+"-"+tMonth+"-"+tDate;
+                        }
+                        function doHandleMonth(month){
+                            var m = month;
+                            if(month.toString().length == 1){
+                                m = "0" + month;
+                            }
+                            return m;
+                        }
+                        myChart.showLoading();    //数据加载完之前先显示一段简单的loading动画
+                        var names=[];    //类别数组（实际用来盛放X轴坐标值）
+                        var nums=[];    //销量数组（实际用来盛放Y坐标值）
+                        var nums1=[];
+                        var nums2=[];
+                        var nums3=[];
+                        for(var i=ls.length-1;i>=0;i--){
+                            //默认查询7天之内的数据，第七天的日期
+                            //  var t = getDay(-7);
+                            var start=$("#startTime").val();
+                            var end = $("#endTime").val();
+                            if(ls[i].nowtime>=start && ls[i].nowtime<=end){
+                                names.push(ls[i].nowtime);    //挨个取出类别并填入类别数组
+                                nums.push(ls[i].hongwai);
+                                nums1.push(ls[i].pm);
+                                nums2.push(ls[i].wendu);
+                                nums3.push(ls[i].shidu);
+                            }
+                        }
+                        myChart.hideLoading();    //隐藏加载动画
+                        myChart.setOption({        //加载数据图表
+                            xAxis: {
+                                data: names,
+                                scale:true
+                            },
+                            series: [{
+                                // 根据名字对应到相应的系列
+                                name: '红外计数',
+                                data: nums
+                            },{
+                                name: 'PM2.5',
+                                data: nums1
+                            },{
+                                name: '温度',
+                                data: nums2
+                            },{
+                                name: '湿度',
+                                data: nums3
+                            }]
+                        });
+                    }else{
+                        //获取图
+                        var myChart = echarts.init(document.getElementById('main'));
+                        myChart.hideLoading();
+                        $.messager.alert({
+                            title:'提示',
+                            msg:'读取数据异常：'+map.msg
+                        });
+                        return ;
+                    }
+                }
+            });
+        }
+
+        function remove(id){
+            alert(id);
+            $.ajax({
+                url:'yujing/remove',
+                data: {
+                    id:id
+                },
+                dataType: "json",
+                type: "post",
+                success:function (map) {
+                    if(map.msg == "1"){
+                        loadYujing();
+                    }
+
+                }
+            });
+        }
+
+        function logout(){
+            window.self.location="/logout"
+        }
+    </script>
+</head>
+<body  style="border: 0px"  >
+<!--    <div id="header">-->
+<!--        贪夜蛾自动检测云平台<br>-->
+<!--        <div th:if="${session.user}" >用户：<span th:text="${session.user.realName}"/></div>-->
+<!--            <a href="#" onclick="logout()">退出</a>-->
+<!--    </div>-->
+<div class="header">
+    <div class="headerLeft">
+        贪夜蛾自动检测云平台
+    </div>
+    <div class='headerRight animated bounceInDown'>
+        <div> 用户名 :</div>
+        <div th:if="${session.user}" ><span th:text="${session.user.realName}"/></div>
+        <div></div>
+        <div><a href="#" onclick="logout()">退出登录</a></div>
+    </div>
+</div>
+    <div id="yujing">
+        <table id="tbYujing" border="1" width="100%">
+            <thead>
+            <tr>
+                <th>设备编号</th>
+                <th>警报类型</th>
+                <th>警报程度</th>
+                <th>时间</th>
+                <th>清除</th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+    <div id="condition">
+        <label >起始时间：</label><input id="startTime" class="easyui-datebox" style="width:150px">
+        <label >结束时间：</label><input id="endTime" class="easyui-datebox" style="width:150px">
+        <select class="easyui-combobox" id="equipId" name="equipId" label="设备:" labelPosition="left" style="width:250px;" editable="false">
+        </select>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" onclick="loadDatas()">检索</a>
+    </div>
+    <div id="datas">
+        <table id="tbDatas" width="100%">
+            <thead>
+            <tr>
+                <th data-options="field:'equipId'">设备编号</th>
+                <th data-options="field:'nowtime'">采集时间</th>
+                <th data-options="field:'hongwai'">红外计数</th>
+                <th data-options="field:'fengxiang'">风向</th>
+                <th data-options="field:'phone'">风速</th>
+                <th data-options="field:'address'">温度</th>
+                <th data-options="field:'remark'">湿度</th>
+                <th data-options="field:'role'">PM2.5</th>
+                <th data-options="field:'nowtime'">土壤(10)温度</th>
+                <th data-options="field:'hongwai'">土壤(10)湿度</th>
+                <th data-options="field:'fengxiang',hidden:true">土壤(20)温度</th>
+                <th data-options="field:'phone',hidden:true">土壤(20)湿度</th>
+                <th data-options="field:'address',hidden:true">土壤(30)温度</th>
+                <th data-options="field:'remark',hidden:true">土壤(30)湿度</th>
+            </tr>
+        </table>
+    </div>
+    <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+    <div id="main" style="width: 100%;height:300px;"></div>
+</body>
+<script type="text/javascript">
+
+    //获取日期getDay(-7) 七天之前的日期
+    function getDay(day){
+        var today = new Date();
+        var targetday_milliseconds=today.getTime() + 1000*60*60*24*day;
+        today.setTime(targetday_milliseconds); //注意，这行是关键代码
+        var tYear = today.getFullYear();
+        var tMonth = today.getMonth();
+        var tDate = today.getDate();
+        tMonth = doHandleMonth(tMonth + 1);
+        tDate = doHandleMonth(tDate);
+        return tYear+"-"+tMonth+"-"+tDate;
+    }
+    function doHandleMonth(month){
+        var m = month;
+        if(month.toString().length == 1){
+            m = "0" + month;
+        }
+        return m;
+    }
+</script>
+</html>

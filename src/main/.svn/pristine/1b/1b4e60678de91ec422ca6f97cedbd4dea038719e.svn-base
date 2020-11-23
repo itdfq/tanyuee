@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itdfq.qianduan.dao.EquipmentDao">
+
+    <resultMap id="Eq" type="com.itdfq.qianduan.model.Equipment">
+        <id property="id" column="id"/>
+        <result property="ename" column="ename"/>
+        <result property="sheng" column="sheng"/>
+        <result property="xian" column="xian"/>
+        <result property="juti" column="juti"/>
+    </resultMap>
+
+    <!--分页条件查询单个-->
+    <select id="findByName" resultMap="Eq">
+        SELECT * FROM admin_equipment where ename like  concat('%',#{ename},'%')
+<!--        <where>-->
+<!--            <if test="ename!=null and ename!='' ">-->
+<!--                ename = #{ename}-->
+<!--            </if>-->
+<!--            <if test="sheng!=null and sheng!='' ">-->
+<!--                and nowtime  <![CDATA[>= ]]> #{startTime}-->
+<!--            </if>-->
+<!--            <if test="endTime!=null and endTime!=''">-->
+<!--                and   #{endTime}  <![CDATA[>= ]]> nowtime-->
+<!--            </if>-->
+<!--        </where>-->
+    </select>
+
+    <!--分页查询-->
+    <select id="findByPage" resultMap="Eq">
+        SELECT * FROM admin_equipment
+    </select>
+    <!--新增-->
+    <insert id="insert">
+        INSERT INTO admin_equipment(ename,sheng,xian,juti)
+        VALUES (#{ename},#{sheng},#{xian},#{juti})
+    </insert>
+    <!--修改-->
+    <update id="update">
+        UPDATE admin_equipment SET ename=#{ename},sheng=#{sheng},xian=#{xian},juti=#{juti}
+        WHERE id=#{id}
+    </update>
+    <!--通过ID删除单个-->
+    <delete id="deleteById">
+        DELETE FROM admin_equipment
+        WHERE id=#{id}
+    </delete>
+
+</mapper>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html  lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+	<link rel="stylesheet" type="text/css"
+		  th:href="@{/static/easyui/themes/default/easyui.css}">
+	<link rel="stylesheet" type="text/css"
+		  th:href="@{/static/easyui/themes/icon.css}">
+	<link rel="stylesheet" type="text/css"
+		  th:href="@{/static/easyui/themes/color.css}">
+	<link rel="stylesheet" type="text/css"
+		  th:href="@{/static/easyui/themes/demo.css}">
+	<script type="text/javascript" th:src="@{/static/easyui/jquery.min.js}"></script>
+	<script type="text/javascript"
+			th:src="@{/static/easyui/jquery.easyui.min.js}"></script>
+	<script type="text/javascript"
+			th:src="@{/static/easyui/locale/easyui-lang-zh_CN.js}"></script>
+<script type="text/javascript">
+	$(function() {
+		//加载用户数据
+		$('#table').datagrid({
+			url : '/user/findUser',
+			queryParams : {
+				username : $('#username').val()
+			},
+			pagination : true,
+			fit : true,
+			method : 'post',
+			singleSelect : true,
+			pageSize : 20,
+			pageList : [ 10, 20, 50, 100, 200 ],
+			onClickRow : function(index, row){
+				//alert(row.id);//单击用户，显示已经授权和没有授权的设备
+				loadPermission(row.id);
+				loadNoPermission(row.id);
+				
+			}
+		});
+		//初始化已有权限表格
+		$('#tableYes').datagrid({
+			url : '/equipment/findPermission',
+			singleSelect : false,
+			pagination : true,
+			pageSize : 20,
+			pageList : [ 10, 20, 50, 100, 200 ],
+			fit : true
+
+		});
+		//初始化未授权表格
+		$('#tableNo').datagrid({
+			url : '/equipment/findNoPermission',
+			singleSelect : false,
+			pagination : true,
+			pageSize : 20,
+			pageList : [ 10, 20, 50, 100, 200 ],
+			fit : true
+		});
+
+	});
+
+
+	// 加载已授权设备
+	function loadPermission(userId) {
+		var queryParams = $('#tableYes').datagrid('options').queryParams;
+		queryParams.userId = userId;
+		$('#tableYes').datagrid('options').queryParams = queryParams;
+		$('#tableYes').datagrid('reload');
+	}
+
+	// 加载未授权设备
+	function loadNoPermission(userId) {
+		var queryParams = $('#tableNo').datagrid('options').queryParams;
+		queryParams.userId = userId;
+		$('#tableNo').datagrid('options').queryParams = queryParams;
+		$('#tableNo').datagrid('reload');
+	}
+	
+	//权限添加
+	function authAdd() {
+		var rows = $('#tableNo').datagrid('getSelections');
+		if(rows.length==0){
+			$.messager.alert({
+				title : '提示',
+				msg : '请选中授权的设备'
+			});
+		}
+
+		var user = $('#table').datagrid('getSelected');
+		if(!user){
+			$.messager.alert({
+				title : '提示',
+				msg : '请选中用户！'
+			});
+		}
+
+		var dataAry=[];
+
+		for(j = 0; j < rows.length; j++) {
+			var auth = {'userId':user.id,'equipmentId':rows[j].id};
+			dataAry.push(auth);
+		}
+
+		$.ajax({
+			url : '/authority/add',
+			type:"POST",
+			dataType:"json",
+			contentType:"application/json", // 指定这个协议很重要
+			data : JSON.stringify(dataAry),
+			success : function(map) {
+				if (map.msg == "1") {
+					$.messager.alert({
+						title : '成功提示',
+						msg : '设备授权成功'
+					});
+					$('#tableYes').datagrid('reload');
+					$('#tableNo').datagrid('reload');
+					$('#tableYes').datagrid('clearSelections');
+					$('#tableNo').datagrid('clearSelections');
+				} else {
+					$.messager.alert({
+						title : '异常提示',
+						msg : '授权失败：' + map.msg
+					});
+				}
+			}
+		});
+	}
+	
+	//权限删除
+	function authRemove() {
+		var rows = $('#tableYes').datagrid('getSelections');//获取选中行
+		if(rows.length==0){
+			$.messager.alert({
+				title : '提示',
+				msg : '请选中删除授权的设备'
+			});
+		}
+
+		var user = $('#table').datagrid('getSelected');
+		if(!user){
+			$.messager.alert({
+				title : '提示',
+				msg : '请选中用户！'
+			});
+		}
+
+		var dataAry=[];
+
+		for(j = 0; j < rows.length; j++) {
+			var auth = {'userId':user.id,'equipmentId':rows[j].id};
+			dataAry.push(auth);
+		}
+
+		
+		$.ajax({
+			url : '/authority/remove',
+			type:"POST",
+			dataType:"json",
+			contentType:"application/json", // 指定这个协议很重要
+			data : JSON.stringify(dataAry),
+			success : function(map) {
+				if (map.msg == "1") {
+					$.messager.alert({
+						title : '成功提示',
+						msg : '删除授权成功'
+					});
+					$('#tableYes').datagrid('reload');
+					$('#tableNo').datagrid('reload');
+					$('#tableYes').datagrid('clearSelections');
+					$('#tableNo').datagrid('clearSelections');
+
+				} else {
+					$.messager.alert({
+						title : '异常提示',
+						msg : '删除授权失败：' + map.msg
+					});
+				}
+			},
+			error : function() {
+			}
+		});
+	}
+
+	
+
+	function queryUser() {
+		var queryParams = $('#table').datagrid('options').queryParams;
+		queryParams.username = $('#username').val();
+		$('#table').datagrid('options').queryParams = queryParams;
+		$('#table').datagrid('reload');
+	}
+	
+	
+	
+</script>
+</head>
+<body style="margin: 0px; padding: 0px;" class="easyui-layout">
+	<div data-options="region:'north',border:false"
+		style="height: 300px; background: #B3DFDA;">
+		<table id="table" title="用户列表" toolbar="#toolbar">
+			<thead>
+				<tr>
+					<th data-options="field:'ck',checkbox:true"></th>
+					<th data-options="field:'username',width:100">用户名</th>
+					<!-- <th data-options="field:'password',width:100">密码</th> -->
+					<th data-options="field:'unit',width:200">单位</th>
+					<th data-options="field:'phone',width:120">手机号码</th>
+					<th data-options="field:'address',width:300">地址</th>
+					<th data-options="field:'role',width:100">角色</th>
+				</tr>
+			</thead>
+		</table>
+		
+		<div id="toolbar">
+				<div style="margin-bottom: 2px; margin-top: 2px;">
+					 <input
+						class="easyui-textbox" type="text" id="username" name="username"></input>
+					<a href="#" class="easyui-linkbutton" iconCls="icon-search"
+						plain="true" onclick="queryUser();">查 询</a>
+				</div>
+			</div>
+	</div>
+
+
+	<div data-options="region:'center'" class="easyui-layout">
+		<div data-options="region:'west',border:false"
+			style="width: 50%;">
+			<table id="tableYes" title="已授权设备" toolbar="#toolbarYes">
+				<thead>
+					<tr>
+						<th data-options="field:'ck',checkbox:true"></th>
+						<th data-options="field:'equipNo',width:100">设备编号</th>
+						<th data-options="field:'equipName',width:200">设备名称</th>
+						<th data-options="field:'address',width:120">设备位置</th>
+						<th data-options="field:'remark',width:300">备注</th>
+					</tr>
+				</thead>
+			</table>
+
+
+			<div id="toolbarYes">
+				<div style="margin-bottom: 2px; margin-top: 2px;">
+					<a href="#"
+						class="easyui-linkbutton" iconCls="icon-remove" plain="true"
+						onclick="authRemove();">删除授权</a> 
+				</div>
+			</div>
+		</div>
+
+		<div data-options="region:'center',border:false">
+			<table id="tableNo" title="未授权设备" toolbar="#toolbarNo">
+				<thead>
+					<tr>
+						<th data-options="field:'ck',checkbox:true"></th>
+						<th data-options="field:'equipNo',width:100">设备编号</th>
+						<th data-options="field:'equipName',width:200">设备名称</th>
+						<th data-options="field:'address',width:120">设备位置</th>
+						<th data-options="field:'remark',width:300">备注</th>
+					</tr>
+				</thead>
+			</table>
+
+
+			<div id="toolbarNo">
+				<div style="margin-bottom: 2px; margin-top: 2px;">
+					<a href="#" class="easyui-linkbutton" iconCls="icon-add"
+						plain="true" onclick="authAdd();">设备授权</a> 
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+</body>
+</html>

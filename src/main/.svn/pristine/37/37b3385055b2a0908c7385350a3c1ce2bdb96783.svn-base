@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itdfq.qianduan.dao.UserDao">
+
+    <resultMap id="UserMap" type="com.itdfq.qianduan.model.User">
+        <id property="id" column="id"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="unit" column="unit"/>
+        <result property="phone" column="phone"/>
+        <result property="address" column="address"/>
+        <result property="role" column="role"/>
+    </resultMap>
+<!--    登录-->
+    <select id="login" resultMap="UserMap" >
+        select * from admin_user where username = #{username} and password = #{password}
+    </select>
+    <!--注册-->
+    <insert id="insert">
+        INSERT INTO admin_user(username,password,unit,phone,address,role) VALUES (#{username},#{password},#{unit},#{phone},#{address},#{role})
+    </insert>
+<!--    查询用户角色-->
+    <select id="selectByRole" resultMap="UserMap">
+        select role from admin_user where username = #{username}
+    </select>
+<!--    查询用户名是否为空-->
+    <select id="selectByName" resultMap="UserMap">
+        select * from admin_user where username= #{username}
+    </select>
+</mapper>

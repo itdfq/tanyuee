@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itdfq.houtai.dao.EquipmentDao">
+
+
+
+    <!--分页条件查询单个-->
+    <select id="select" resultType="com.itdfq.houtai.model.Equipment">
+        SELECT * FROM admin_equipment
+        <where>
+            <if test="equipNo != null">
+                equipNo like concat('%',#{equipNo},'%')
+            </if>
+            <if test="equipName != null">
+                AND equipName like concat('%',#{equipName},'%')
+            </if>
+        </where>
+    </select>
+
+    <!-- 用户具有权限的设备-->
+    <select id="selectPermission" resultType="com.itdfq.houtai.model.Equipment">
+        select a.* from admin_equipment a, admin_authority b
+        where a.id=b.equipmentId and b.userId=#{userId}
+    </select>
+
+
+
+    <!-- 用户不具备权限的设备-->
+    <select id="selectNoPermission" resultType="com.itdfq.houtai.model.Equipment">
+        select x.* from admin_equipment  x
+        where x.id  not in
+              (select a.id from admin_equipment a, admin_authority b
+                  where a.id=b.equipmentId and b.userId=#{userId})
+    </select>
+
+
+
+    <!--新增-->
+    <insert id="insert">
+        INSERT INTO admin_equipment(equipNo,equipName,address,remark)
+        VALUES (#{equipNo},#{equipName},#{address},#{remark})
+    </insert>
+    <!--修改-->
+    <update id="update">
+        UPDATE admin_equipment SET equipNo=#{equipNo},equipName=#{equipName},address=#{address},remark=#{remark}
+        WHERE id=#{id}
+    </update>
+    <!--通过ID删除单个-->
+    <delete id="deleteById">
+        DELETE FROM admin_equipment
+        WHERE id=#{id}
+    </delete>
+
+</mapper>

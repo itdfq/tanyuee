@@ -1,0 +1,33 @@
+package com.itdfq.qianduan.dao;
+
+import com.github.pagehelper.Page;
+import com.itdfq.qianduan.model.Equipment;
+
+/**
+ * Created by DFQ on 2020/10/11 16:07
+ */
+public interface EquipmentDao {
+    /**
+     * 通过ID查询单个
+     */
+    Page<Equipment> findByName(Equipment equipment);
+    /**
+     * 分页查询
+     */
+    Page<Equipment> findByPage();
+
+    /**
+     * 新增
+     */
+    void insert(Equipment equipment);
+
+    /**
+     * 修改
+     */
+    void update(Equipment equipment);
+
+    /**
+     * 通过ID删除单个
+     */
+    void deleteById(Equipment equipment);
+}

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>添加数据</title>
+		<link rel="stylesheet" type="text/css" href="easyui/themes/default/easyui.css">
+		<link rel="stylesheet" type="text/css" href="easyui/themes/icon.css">
+
+		<script type="text/javascript" src="easyui/jquery.min.js"></script>
+		<script type="text/javascript" src="easyui/jquery.easyui.min.js"></script>
+		<script type="text/javascript" src="easyui/locale/easyui-lang-zh_CN.js"></script>
+	</head>
+	<script type="text/javascript">
+		// 获取页面加载的参数的值
+		function GetQueryString(name) {
+			var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+			var r = window.location.search.substr(1).match(reg);
+			if (r != null) return unescape(r[2]);
+			return null;
+		}
+		//var username=GetQueryString(username);
+		//alert(username);
+	</script>
+	<body style="width: 100%;height: 100%" >
+	<div style="margin-top: 20px; " align="center">
+	<div class="easyui-panel" title="添加设备" style="width:100%;max-width:4000px;padding:30px 60px;">
+		<form id="ff" class="easyui-form"  data-options="novalidate:true">
+			<div style="margin-bottom:20px">
+				<input class="easyui-textbox" name="ename" style="width:100%" id="ename" data-options="label:'设备名称:',required:true">
+			</div>
+			<div style="margin-bottom:20px">
+				<input class="easyui-textbox" name="sheng" style="width:100%" id="sheng" type="text"  data-options="label:'省份:',required:true ">
+			</div>
+			<div style="margin-bottom:20px">
+				<input class="easyui-textbox" name="xian" style="width:100%" id="xian" type="text" data-options="label:'县区:',required:true ">
+			</div>
+			<div style="margin-bottom:20px">
+				<input class="easyui-textbox" name="具体" style="width:100%" id="juti" data-options="label:'具体位置:',required:true">
+			</div>
+
+		</form>
+		<div style="text-align:center;padding:5px 0">
+			<button id="resign" class="easyui-linkbutton" style="width:80px" onclick="resign()">添加</button>
+			<a href="javascript:void(0)" class="easyui-linkbutton" onclick="clearForm()" style="width:80px">重置</a>
+		</div>
+	</div>
+	<script>
+		function resign() {
+			var ename=$('#ename').val();
+			var sheng=$('#sheng').val();
+			var xian=$('#xian').val();
+			var juti=$('#juti').val();
+			var data={"ename":ename,"sheng":sheng,"xian":xian,"juti":juti };
+			var datas = JSON.stringify(data);
+			if(ename.length<=0||sheng.length<=0||xian.length<=0||juti.length<=0) {
+				alert("不能为空！！");
+				return;
+			}
+			$.ajax({
+				url:"equip/insert",
+				data:datas,
+				type:"post",
+				dataType: "json",
+				contentType: "application/json;charset=UTF-8",
+				success:function (data) {
+					if(data.msg){
+						alert("添加成功");
+						window.parent.location.reload();
+					}
+					else{
+						alert("添加失败");
+					}
+				}
+			});
+		}
+
+		function clearForm(){
+			$('#ff').form('clear');
+		}
+	</script>
+	</div>
+	</body>
+</html>

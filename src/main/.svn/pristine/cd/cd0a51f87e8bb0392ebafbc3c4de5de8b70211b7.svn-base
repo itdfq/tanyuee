@@ -1,0 +1,59 @@
+package com.itdfq.service.impl;
+
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.itdfq.dao.DatasDAO;
+import com.itdfq.model.Datas;
+import com.itdfq.service.DatasService;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
+import java.util.List;
+import java.util.Map;
+
+@Service
+@Transactional(rollbackFor = Exception.class)
+public class DatasServiceImpl implements DatasService {
+
+    @Resource
+    private DatasDAO datasDAO;
+
+    @Transactional(readOnly = true)
+    @Override
+    public PageInfo<Datas> findByTJ(int pageNum,int pageSize,Datas datas) {
+        PageHelper.startPage(pageNum, pageSize);
+        return PageInfo.of(datasDAO.findByTJ(datas));
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<Datas> selectAll(Map map) {
+        return datasDAO.selectAll(map);
+    }
+    @Transactional(readOnly = true)
+    @Override
+    public PageInfo<Datas> findByPage(int pageNum, int pageSize) {
+        PageHelper.startPage(pageNum, pageSize);
+        return PageInfo.of(datasDAO.findByPage());
+    }
+
+    @Override
+    public void insert(Datas datas) {
+        datasDAO.insert(datas);
+    }
+
+
+
+
+    @Override
+    public void update(Datas datas) {
+        datasDAO.update(datas);
+    }
+
+    @Override
+    public void deleteById(Integer id) {
+        datasDAO.deleteById(id);
+    }
+
+}

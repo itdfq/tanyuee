@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itdfq.qianduan.dao.DatasDAO">
+
+
+    <!--分页条件查询单个-->
+    <select id="findByCondition" resultType="com.itdfq.qianduan.model.DatasVO">
+        SELECT a.*,b.equipNo FROM datas a,admin_equipment b where a.equipId=b.id
+            <if test="equipId!=null and equipId!=''">
+                and equipId = #{equipId}
+            </if>
+            <if test="startTime!=null and startTime!='' ">
+                and nowtime  <![CDATA[>= ]]> #{startTime}
+            </if>
+            <if test="endTime!=null and endTime!=''">
+                and   #{endTime}  <![CDATA[>= ]]> nowtime
+            </if>
+            order by nowtime desc
+    </select>
+
+    <!--通过ID删除单个-->
+    <delete id="deleteById">
+        DELETE FROM datas
+        WHERE id=#{id}
+    </delete>
+
+</mapper>

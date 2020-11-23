@@ -1,0 +1,57 @@
+package com.itdfq.dao;
+
+import com.github.pagehelper.Page;
+import com.itdfq.model.Datas;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ *
+ */
+public interface DatasDAO {
+
+    /**
+     * 通过ID查询单个
+     *
+     * @param id ID
+     * @return {@link Datas}
+     */
+
+
+    /*
+    查询所有
+     */
+    List<Datas> selectAll(@Param("content") Map map);
+    /**
+     * 分页查询
+     *
+     * @return {@link Datas}
+     */
+    Page<Datas> findByPage();
+
+    Page<Datas> findByTJ(Datas datas);
+
+    /**
+     * 新增
+     *
+     * @param datas
+     */
+    void insert(Datas datas);
+
+    /**
+     * 修改
+     *
+     * @param datas
+     */
+    void update(Datas datas);
+
+    /**
+     * 通过ID删除单个
+     *
+     * @param id ID
+     */
+    void deleteById(Integer id);
+
+}

@@ -1,0 +1,47 @@
+package com.itdfq.service;
+
+import com.github.pagehelper.PageInfo;
+import com.itdfq.model.Datas;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ *
+ */
+public interface DatasService {
+
+
+    PageInfo<Datas> findByTJ(int pageNum,int pageSize,Datas datas);
+
+    List<Datas> selectAll(Map map);
+
+    /**
+     * 分页查询
+     *
+     * @param pageNum  页号
+     * @param pageSize 每页大小
+     * @return {@link Datas}
+     */
+    PageInfo<Datas> findByPage(int pageNum, int pageSize);
+    /**
+     * 新增
+     *
+     * @param datas
+     */
+    void insert(Datas datas);
+    /**
+     * 修改
+     *
+     * @param datas
+     */
+    void update(Datas datas);
+
+    /**
+     * 通过ID删除单个
+     *
+     * @param id ID
+     */
+    void deleteById(Integer id);
+
+}

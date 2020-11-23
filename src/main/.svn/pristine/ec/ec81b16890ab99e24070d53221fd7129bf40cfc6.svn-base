@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itdfq.dao.YujingDao">
+
+    <resultMap id="YujingMap" type="com.itdfq.model.Yujing">
+        <id property="id" column="id"/>
+        <result property="time" column="time"/>
+        <result property="name" column="name"/>
+        <result property="dengji" column="dengji"/>
+        <result property="shebei" column="shebei"/>
+    </resultMap>
+
+
+    <!--分页查询-->
+    <select id="findByPage" resultMap="YujingMap">
+        SELECT * FROM yujing
+    </select>
+    <!--新增-->
+    <insert id="insert">
+        INSERT INTO yujing(time,dengji,name,shebei) VALUES (#{time},#{dengji},#{name},#{shebei})
+    </insert>
+<!--    删除-->
+    <delete id="delete">
+        DELETE FROM yujing
+        WHERE id=#{id}
+    </delete>
+
+</mapper>

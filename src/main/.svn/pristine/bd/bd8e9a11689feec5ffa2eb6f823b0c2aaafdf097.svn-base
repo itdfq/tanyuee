@@ -1,0 +1,45 @@
+package com.itdfq.qianduan.service.impl;
+
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.itdfq.qianduan.dao.EquipmentDao;
+import com.itdfq.qianduan.model.Equipment;
+import com.itdfq.qianduan.service.EquipmentService;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+
+/**
+ * Created by DFQ on 2020/10/11 16:14
+ */
+@Service
+public class EquipmentServiceImpl  implements EquipmentService {
+    @Resource
+    private EquipmentDao equipmentDao;
+    @Override
+    public PageInfo<Equipment> findByName(int pageNum, int pageSize, Equipment equipment) {
+        PageHelper.startPage(pageNum, pageSize);
+        return PageInfo.of(equipmentDao.findByName(equipment));
+    }
+
+    @Override
+    public PageInfo<Equipment> findByPage(int pageNum, int pageSize) {
+        PageHelper.startPage(pageNum,pageSize);
+        return PageInfo.of(equipmentDao.findByPage());
+    }
+
+    @Override
+    public void insert(Equipment equipment) {
+            equipmentDao.insert(equipment);
+    }
+
+    @Override
+    public void update(Equipment equipment) {
+            equipmentDao.update(equipment);
+    }
+
+    @Override
+    public void deleteById(Equipment equipment) {
+            equipmentDao.deleteById(equipment);
+    }
+}

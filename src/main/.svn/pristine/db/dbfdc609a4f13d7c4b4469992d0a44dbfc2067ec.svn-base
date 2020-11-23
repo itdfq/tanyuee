@@ -1,0 +1,50 @@
+package com.itdfq.qianduan.model;
+
+/**
+ * Created by DFQ on 2020/10/11 16:05
+ */
+public class Equipment {
+    private Integer id;
+    private  String ename;  //设备名称
+    private  String  sheng;//省份
+    private String xian; //县区
+    private  String juti; //具体位置
+    public Integer getId() {
+        return id;
+    }
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getEname() {
+        return ename;
+    }
+
+    public void setEname(String ename) {
+        this.ename = ename;
+    }
+
+    public String getSheng() {
+        return sheng;
+    }
+
+    public void setSheng(String sheng) {
+        this.sheng = sheng;
+    }
+
+    public String getXian() {
+        return xian;
+    }
+
+    public void setXian(String xian) {
+        this.xian = xian;
+    }
+
+    public String getJuti() {
+        return juti;
+    }
+
+    public void setJuti(String juti) {
+        this.juti = juti;
+    }
+}

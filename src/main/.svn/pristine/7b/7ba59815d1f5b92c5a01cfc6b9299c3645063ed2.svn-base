@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html  lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>贪夜蛾自动检测云系统</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/static/easyui/themes/default/easyui.css}" />
+    <link rel="stylesheet" type="text/css" th:href="@{/static/easyui/themes/icon.css}">
+    <script type="text/javascript" th:src="@{/static/easyui/jquery.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/easyui/jquery.easyui.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/easyui/locale/easyui-lang-zh_CN.js}"></script>
+    <script type="text/javascript " th:src="@{/static/js/echarts.min.js}"></script>
+    <script type="text/javascript">
+
+        $(function() {
+            $('#dg').datagrid({ loadFilter: pagerFilter }).datagrid({
+                url:'/datass/findByPage',
+                title:'贪夜蛾自动检测(默认显示近七天数据)',
+                rownumbers:true,
+                singleSelect:true,  //取消多选
+                autoRowHeight:false,
+                pagination:true,  //分页
+                pageSize:10,
+                fit:true, //防止水平抖动
+                toolbar:'#tb',
+                fitColumns: true,
+
+
+            });
+            function pagerFilter(data){
+                if (typeof data.length == 'number' && typeof data.splice == 'function'){	// is array
+                    data = {
+                        total: data.length,
+                        list: data
+                    }
+                }
+                var dg = $(this);
+                var opts = dg.datagrid('options');
+                var pager = dg.datagrid('getPager');
+                pager.pagination({
+                    onSelectPage:function(pageNum, pageSize){
+                        opts.pageNumber = pageNum;
+                        opts.pageSize = pageSize;
+                        pager.pagination('refresh',{
+                            pageNumber:pageNum,
+                            pageSize:pageSize
+                        });
+                        dg.datagrid('loadData',data);
+                    }
+                });
+                if (!data.originalRows){
+                    data.originalRows = (data.list);
+                }
+                var start = (opts.pageNumber-1)*parseInt(opts.pageSize);
+                var end = start + parseInt(opts.pageSize);
+                data.rows = (data.originalRows.slice(start, end));
+                return data;
+            }
+          //  将预警信息填写到表中      10-15  轻微    15-20  严重  20-∞  特别严重
+            $.ajax({
+                url:'/datass/selectAll',
+                type : "post",
+                async : true,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+                data : {},
+                dataType : "json",        //返回数据形式为json
+                success : function(result) {
+                    if (result){
+                        for(var i=0;i<result.length;i++){
+                            var time;
+                            var name;
+                            var dengji;
+                            var shebei;
+                            if(result[i].hongwai>10){
+                                 time=result[i].nowtime;
+                                 name='红外指数超标';
+                                if(result[i].hongwai<=15){
+                                     dengji='轻微';
+                                     shebei=result[i].shebei;
+                                }
+                                else if(result[i].hongwai>15&&result[i].hongwai<=20){
+                                     dengji='严重';
+                                    shebei=result[i].shebei;
+                                }else {
+                                    dengji='特别严重';
+                                    shebei=result[i].shebei;
+                                }
+                                var data={"time":time,"name":name,"dengji":dengji,"shebei":shebei};
+                                //将实体类转换为json
+                                var datas = JSON.stringify(data);
+                                $.ajax({
+                                    url:'/yujing/insert',
+                                    type: 'post',
+                                    dsync: true,
+                                    dataType:'json',
+                                    data: datas,
+                                    contentType: "application/json;charset=UTF-8"
+                                })
+                            }
+                            if(result[i].shidu>10){
+                                time=result[i].nowtime;
+                                name='土地湿度超标';
+                                if(result[i].shidu<=15){
+                                    dengji='轻微';
+                                    shebei=result[i].shebei;
+                                }
+                                else if(result[i].shidu>15&&result[i].shidu<=20){
+                                    dengji='严重';
+                                    shebei=result[i].shebei;
+                                }else {
+                                    dengji='特别严重';
+                                    shebei=result[i].shebei;
+                                }
+                                var data={"time":time,"name":name,"dengji":dengji,"shebei":shebei};
+                                //将实体类转换为json
+                                var datas = JSON.stringify(data);
+                                $.ajax({
+                                    url:'/yujing/insert',
+                                    type: 'post',
+                                    dsync: true,
+                                    dataType:'json',
+                                    data: datas,
+                                    contentType: "application/json;charset=UTF-8"
+                                })
+                            }
+                        }
+                    }
+
+                }
+            })
+            $('#dg2').datagrid({ loadFilter: pagerFilter }).datagrid({
+                url: '/yujing/findByPage'  ,   //加载数据
+                title:'预警信息',
+                rownumbers:true,
+                singleSelect:true,  //取消多选
+                autoRowHeight:false,
+                pagination:true,  //分页
+                pageSize:10,
+                fit:false, //防止水平抖动
+                toolbar:'#tb2',
+                fitColumns: true
+
+            });
+        });
+        function refresh() {
+            $('#dg').datagrid('reload');//刷新数据
+        }
+        function refresh2() {
+            $('#dg2').datagrid('reload');//刷新数据
+        }
+    </script>
+    <style>
+        /*.datagrid-view {*/
+        /*       background-color:red;*/
+        /*   }*/
+    </style>
+</head>
+<body  style="border: 0px" onresize="myFunction()" >
+
+<div id="tb" >
+    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-refresh',plain:true" onclick="refresh()">刷新</a>
+    <label >起始时间：</label><input id="starTime" class="easyui-datebox" style="width:150px">
+    <label >结束时间：</label><input id="endTime" class="easyui-datebox" style="width:150px">
+    <select class="easyui-combobox" name="state" label="数据来源:" labelPosition="left" style="width:200px;" id="key">
+        <option value="">全部设备</option>
+        <option value="设备A">设备A</option>
+        <option value="设备B">设备B</option>
+        <option value="设备C">设备C</option>
+    </select>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" onclick="doSearch()">开始检索</a>
+    <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+    <div id="main" style="width: 100%;height:400px;"></div>
+</div>
+<div id="tb2">
+    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true" onclick="removeit()">删除</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-refresh',plain:true" onclick="refresh2()">刷新</a>
+
+</div>
+    <table id="dg" >
+        <thead>
+            <tr>
+                <th data-options="field:'equipment'">设备</th>
+                <th data-options="field:'nowtime'">时间</th>
+                <th data-options="field:'hongwai'">红外计数</th>
+                <th data-options="field:'fengxiang'">风向</th>
+                <th data-options="field:'phone'">风速</th>
+                <th data-options="field:'address'">温度</th>
+                <th data-options="field:'remark'">湿度</th>
+                <th data-options="field:'role'">PM2.5</th>
+                <th data-options="field:'nowtime'">土壤（10）温度</th>
+                <th data-options="field:'hongwai'">土壤（10）湿度</th>
+                <th data-options="field:'fengxiang'">土壤（20）温度</th>
+                <th data-options="field:'phone'">土壤（20）湿度</th>
+                <th data-options="field:'address'">土壤（30）温度</th>
+                <th data-options="field:'remark'">土壤（30）湿度</th>
+            </tr>
+        </thead>
+
+        <!--
+
+        {field:'',title:'',width:50,editor:'textbox'},
+        {field:'fengsu',title:'',width:100,editor:'numberbox'},
+        {field:'wendu',title:'',width:50,editor:'textbox'},
+        {field:'shidu',title:'',width:50,editor:'textbox'},
+        {field:'pm',title:'',width:50,editor:'numberbox'},
+        {field:'tWendu10',title:'',width:150,editor:'textbox'},
+        {field:'tShidu10',title:'土壤（10cm）湿度',width:150,editor:'textbox'},
+        {field:'tWendu20',title:'土壤（20cm）温度',width:150,editor:'textbox'},
+        {field:'tShidu20',title:'土壤（20cm）湿度',width:150,editor:'textbox'},
+        {field:'shebei',title:'数据来源',width:100,editor:'textbox'},
+        ]]-->
+
+    </table>
+    <table id="dg2">
+       <!-- columns:[[
+        // {checkbox:true,field:''},
+        {field:'time',title:'检测日期',width:150,editor:'textbox'},
+        {field:'name',title:'报警类型',width:150,editor:'textbox'},
+        {field:'dengji',title:'报警程度',width:100,editor:'textbox'},
+        {field:'shebei',title:'数据来源',width:100,editor:'textbox'}
+        ]]-->
+
+    </table>
+</body>
+<script type="text/javascript">
+
+    function doSearch() {
+        var a = $("#key").val();
+        var starTtime=$("#starTime").val();
+        var  ending =$("#endTime").val();
+        var kinds = {"shebei":a,"startTime":starTtime,"endTime":ending};
+        var datas=JSON.stringify(kinds);
+        // var kinds = $("#kinds").val();
+        // var kinds1 = {"kinds":kinds};
+        // var datas = JSON.stringify(kinds1);
+       // alert(datas);
+        $.ajax({
+            url:'datass/findByTJ',
+            contentType: "application/json;charset=UTF-8",
+            data: datas,
+            dataType: "json",
+            type: "post",
+            success:function (data) {
+                console.log(data);
+                if (data) {
+                    $("#dg").datagrid('loadData', data);
+                    // var a=(new Date()).toLocaleDateString()//获取当前日期
+                    // a =a.replace(/\//g,'-');//替换2017/05/03 为    2017-05-03
+                    // 根据时间条件画图
+                    // var nowdate= (new Date(a))/1000;//把当前日期变成时间戳
+                    // var wdate=(new Date(v.wdate))/1000;//把数据库日期变成时间
+                }
+            }
+        });
+        // 条件查询
+
+        myChart.showLoading();    //数据加载完之前先显示一段简单的loading动画
+        var names=[];    //类别数组（实际用来盛放X轴坐标值）
+        var nums=[];    //销量数组（实际用来盛放Y坐标值）
+        var nums1=[];
+        var nums2=[];
+        var nums3=[];
+        $.ajax({
+            type : "post",
+            async : true,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+            url : "/datass/selectAll",    //请求发送到TestServlet处
+            data : {},
+            dataType : "json",        //返回数据形式为json
+            success : function(result) {
+                //请求成功时执行该函数内容，result即为服务器返回的json对象
+                if (result) {
+                    //如果选择全部设备
+                    if(a==''||a==null) {
+                        //如果没有选择日期选择全部设备默认全部查询
+                        if ((starTtime == '' || starTtime == null) && (endTime == null || endTime == '')) {
+                            for (var i = 0; i < result.length; i++) {
+                                names.push(result[i].nowtime);
+                                nums.push(result[i].hongwai);
+                                nums1.push(result[i].pm);
+                                nums2.push(result[i].wendu);
+                                nums3.push(result[i].shidu);
+                            }
+                        }
+                        //选择了日期选择全部设备
+                        else {
+                            for (var i = 0; i < result.length; i++) {
+                                if (result[i].nowtime >= starTtime && result[i].nowtime <= endTime) {
+                                    names.push(result[i].nowtime);
+                                    nums.push(result[i].hongwai);
+                                    nums1.push(result[i].pm);
+                                    nums2.push(result[i].wendu);
+                                    nums3.push(result[i].shidu);
+                                }
+                            }
+                        }
+                        // 选择单一设备
+                    }else{
+                        for(var i=0;i<result.length;i++){
+                            //选择了设备没有选择日期
+                            if((starTtime == '' || starTtime == null) && (endTime == null || endTime == '')&&result[i].shebei==a){
+                                names.push(result[i].nowtime);
+                                nums.push(result[i].hongwai);
+                                nums1.push(result[i].pm);
+                                nums2.push(result[i].wendu);
+                                nums3.push(result[i].shidu);
+                            }else{
+                                //选择了设备和日期
+                                if(result[i].nowtime>=starTtime && result[i].nowtime<=endTime&&result[i].shebei==a){
+                                    names.push(result[i].nowtime);
+                                    nums.push(result[i].hongwai);
+                                    nums1.push(result[i].pm);
+                                    nums2.push(result[i].wendu);
+                                    nums3.push(result[i].shidu);
+                                }
+                            }
+                        }
+                    }
+                    myChart.hideLoading();    //隐藏加载动画
+                    myChart.setOption({        //加载数据图表
+                        xAxis: {
+                            data: names,
+                            scale:true
+                        },
+                        series: [{
+                            // 根据名字对应到相应的系列
+                            name: '红外计数',
+                            data: nums
+                        },{
+                            name: 'PM2.5',
+                            data: nums1
+                        },{
+                            name: '温度',
+                            data: nums2
+                        },{
+                            name: '湿度',
+                            data: nums3
+                        }]
+                    });
+                }
+            },
+            error : function(errorMsg) {
+                //请求失败时执行该函数
+                alert("图表请求数据失败!");
+                myChart.hideLoading();
+            }
+        })
+        // window.onresize = myChart.resize();
+        // $("#main").resize(myChart.resize);
+        // myChart.setOption(option);
+        // myChart.setOption(option);
+        setTimeout(function (){
+            window.onresize = function (){
+                myChart.resize();
+            }
+        },200)
+    }
+    function myFunction(){
+        var w = window.outerWidth;
+        var h =window.outerHeight;
+    }
+    var myChart = echarts.init(document.getElementById('main'));
+    // 显示标题，图例和空的坐标轴
+    myChart.setOption({
+        title: {
+            text: ''
+        },
+        tooltip: {
+            trigger: 'axis', //触发类型；轴触发，axis则鼠标hover到一条柱状图显示全部数据，item则鼠标hover到折线点显示相应数据，
+            axisPointer: {  //坐标轴指示器，坐标轴触发有效，
+                type: 'line', //默认为line，line直线，cross十字准星，shadow阴影
+                crossStyle: {
+                    color: '#fff'
+                }
+            }
+        },
+        legend: {
+            data:['红外计数','PM2.5','温度','湿度']
+        },
+        xAxis: {
+            boundaryGap: false,
+            data: []
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+        },
+        toolbox: {
+            feature: {
+                saveAsImage: {}
+            }
+        },
+        yAxis: {
+            scale:true
+        },
+        series: [{
+            name: '红外计数',
+            type: 'line',
+            data: []
+        },{
+            name: 'PM2.5',
+            type: 'line',
+            data: []
+        },{
+            name: '温度',
+            type: 'line',
+            data: []
+        },{
+            name: '湿度',
+            type: 'line',
+            data: []
+        }]
+    });
+    //获取日期getDay(-7) 七天之前的日期
+    function getDay(day){
+        var today = new Date();
+        var targetday_milliseconds=today.getTime() + 1000*60*60*24*day;
+        today.setTime(targetday_milliseconds); //注意，这行是关键代码
+        var tYear = today.getFullYear();
+        var tMonth = today.getMonth();
+        var tDate = today.getDate();
+        tMonth = doHandleMonth(tMonth + 1);
+        tDate = doHandleMonth(tDate);
+        return tYear+"-"+tMonth+"-"+tDate;
+    }
+    function doHandleMonth(month){
+        var m = month;
+        if(month.toString().length == 1){
+            m = "0" + month;
+        }
+        return m;
+    }
+    myChart.showLoading();    //数据加载完之前先显示一段简单的loading动画
+    var names=[];    //类别数组（实际用来盛放X轴坐标值）
+    var nums=[];    //销量数组（实际用来盛放Y坐标值）
+    var nums1=[];
+    var nums2=[];
+    var nums3=[];
+
+    $.ajax({
+        type : "post",
+        async : true,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+        url : "/datass/selectAll",    //请求发送到TestServlet处
+        data : {},
+        dataType : "json",        //返回数据形式为json
+        success : function(result) {
+            //请求成功时执行该函数内容，result即为服务器返回的json对象
+            if (result) {
+                for(var i=0;i<result.length;i++){
+                    //默认查询7天之内的数据，第七天的日期
+                    var t = getDay(-7);
+                    if(result[i].nowtime>=t){
+                        names.push(result[i].nowtime);    //挨个取出类别并填入类别数组
+                        nums.push(result[i].hongwai);
+                        nums1.push(result[i].pm);
+                        nums2.push(result[i].wendu);
+                        nums3.push(result[i].shidu);
+                    }
+                }
+                myChart.hideLoading();    //隐藏加载动画
+                myChart.setOption({        //加载数据图表
+                    xAxis: {
+                        data: names,
+                        scale:true
+                    },
+                    series: [{
+                        // 根据名字对应到相应的系列
+                        name: '红外计数',
+                        data: nums
+                    },{
+                        name: 'PM2.5',
+                        data: nums1
+                    },{
+                        name: '温度',
+                        data: nums2
+                    },{
+                        name: '湿度',
+                        data: nums3
+                    }]
+                });
+            }
+        },
+        error : function(errorMsg) {
+            //请求失败时执行该函数
+            alert("图表请求数据失败!");
+            myChart.hideLoading();
+        }
+    })
+    function removeit(){
+        var row =$("#dg2").datagrid("getSelected");
+        console.log(row);
+        if(row!=null){
+            editIndex=$("#dg2").datagrid("getRowIndex",row);
+            if (editIndex == undefined){return}
+            $('#dg').datagrid('cancelEdit', editIndex)
+                .datagrid('deleteRow', editIndex);
+            editIndex = undefined;
+            var data = {"id":row.id};
+            //将实体类转换为json
+            var datas = JSON.stringify(data);
+            $.ajax({
+                url:'yujing/delete',
+                contentType: "application/json;charset=UTF-8",
+                data: datas,
+                dataType: "json",
+                type: "post",
+                success:function (data) {
+                    if(data.msg==0){
+                        alert("操作出错，请重试");
+                    }else{
+                        alert("删除成功");
+                    }
+                }
+            });
+        }else{
+            alert("请勾选所要删除的行");
+        }
+
+    }
+
+    setTimeout(function (){
+        window.onresize = function (){
+            myChart.resize();
+        }
+    },200)
+</script>
+</html>

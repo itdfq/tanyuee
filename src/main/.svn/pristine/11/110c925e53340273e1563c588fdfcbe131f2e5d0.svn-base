@@ -1,0 +1,314 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet" type="text/css"
+	href="../../easyui-1.5.2/themes/default/easyui.css">
+<link rel="stylesheet" type="text/css"
+	href="../../easyui-1.5.2/themes/icon.css">
+<link rel="stylesheet" type="text/css"
+	href="../../easyui-1.5.2/themes/color.css">
+<link rel="stylesheet" type="text/css"
+	href="../../easyui-1.5.2/themes/demo.css">
+<script type="text/javascript" src="../../easyui-1.5.2/jquery.min.js"></script>
+<script type="text/javascript"
+	src="../../easyui-1.5.2/jquery.easyui.min.js"></script>
+<script type="text/javascript"
+	src="../../easyui-1.5.2/locale/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript">
+	$(function() {
+		//表格加载数据
+		$('#table').datagrid({
+			url : '${pageContext.request.contextPath}/user/findUser.action',
+			queryParams : {
+				username : $('#username').val()
+			},
+			pagination : true,
+			fit : true,
+			method : 'post',
+			singleSelect : true,
+			pageSize:20,
+			pageList:[10,20,50,100,200]
+		});	
+		
+	});
+	
+	
+	//打开用户添加对话框
+	function userAddOpen() {
+		$('#formAdd').form('clear');
+		$('#role').combobox('setValue', '普通用户');
+		$('#dlgAdd').dialog('open').dialog('center');
+	}
+	//用户添加
+	function userAdd() {
+		$.ajax({
+			url:'${pageContext.request.contextPath}/user/userAdd.action',
+			data : $('#formAdd').serialize(),
+			success:function(map){
+				if(map.msg=="1"){
+					$.messager.alert({
+						title:'成功提示',
+						msg:'用户添加成功'
+					});
+					$('#dlgAdd').dialog('close');
+					//tableReload();
+					$('#table').datagrid('reload');
+					$('#table').datagrid('clearSelections');
+
+				}else{
+					$.messager.alert({
+						title:'异常提示',
+						msg:'用户添加失败：'+map.msg
+					});
+				}
+			}
+		});
+	}
+	//打开用户修改对话框
+	function userModifyOpen() {
+		var row = $('#table').datagrid('getSelected');//获取选中行
+		if (!row) {
+			$.messager.alert("选择提示", "请选择您要修改的记录！");
+			return;
+		}
+		$('#formMod').form('load', row);
+		$('#dlgMod').dialog('open').dialog('center');
+	}
+	//用户修改
+	function userModify() {
+		$.ajax({
+			url:'${pageContext.request.contextPath}/user/userModify.action',
+			method:'post',
+			data : $('#formMod').serialize(),
+			success:function(map){
+				if(map.msg=="1"){
+					$.messager.alert({
+						title:'成功提示',
+						msg:'用户修改成功'
+					});
+					$('#dlgMod').dialog('close');
+					$('#table').datagrid('reload');
+					//tableReload();
+					$('#table').datagrid('clearSelections');
+
+				}else{
+					$.messager.alert({
+						title:'异常提示',
+						msg:'用户添加失败：'+map.msg
+					});
+				}
+			}
+		});
+	}
+	//用户删除
+	function userRemove() {
+		var row = $('#table').datagrid('getSelected');//获取选中行
+		if (!row) {
+			$.messager.alert("删除提示", "请选择您要删除的记录！");
+			return;
+		}
+		$.ajax({
+			url:'${pageContext.request.contextPath}/user/userRemove.action',
+			data:{
+				id:row.id
+			},
+			success:function(map){
+				if(map.msg=="1"){
+					$.messager.alert({
+						title:'成功提示',
+						msg:'用户删除成功'
+					});
+					$('#table').datagrid('reload');
+					//tableReload();
+					$('#table').datagrid('clearSelections');
+
+				}else{
+					$.messager.alert({
+						title:'异常提示',
+						msg:'用户添加失败：'+map.msg
+					});
+				}
+			},
+			error:function(){
+			}
+		});		
+	}
+	
+	function passwordReset(){
+		var row = $('#table').datagrid('getSelected');//获取选中行
+		if (!row) {
+			$.messager.alert("密码重置提示", "请选择您要密码重置的记录！");
+			return;
+		}
+		$.ajax({
+			url:'${pageContext.request.contextPath}/user/passwordReset.action',
+			data:{
+				id:row.id
+			},
+			success:function(map){
+				if(map.msg=="1"){
+					$.messager.alert({
+						title:'密码重置提示',
+						msg:'密码重置成功'
+					});
+					$('#table').datagrid('reload');
+					//tableReload();
+					$('#table').datagrid('clearSelections');
+
+				}else{
+					$.messager.alert({
+						title:'异常提示',
+						msg:'密码重置失败：'+map.msg
+					});
+				}
+			},
+			error:function(){
+			}
+		});	
+	}
+	
+	function query(){
+		var queryParams = $('#table').datagrid('options').queryParams;
+		queryParams.username = $('#username').val();
+		$('#table').datagrid('options').queryParams = queryParams;
+		$('#table').datagrid('reload');
+	}
+</script>
+</head>
+<body style="margin: 0px; padding: 0px;">
+	<table id="table" title="用户管理" toolbar="#toolbar">
+		<thead>
+			<tr>
+				<th data-options="field:'ck',checkbox:true"></th>
+				<th data-options="field:'username',width:100">用户名</th>
+				<!-- <th data-options="field:'password',width:100">密码</th> -->
+				<th data-options="field:'unit',width:200">单位</th>
+				<th data-options="field:'phone',width:120">手机号码</th>
+				<th data-options="field:'address',width:300">地址</th>
+				<th data-options="field:'role',width:100">角色</th>
+			</tr>
+		</thead>
+	</table>
+	<div id="toolbar">
+		<div style="margin-bottom: 2px; margin-top: 2px;">
+			<a href="#" class="easyui-linkbutton" iconCls="icon-add" plain="true"
+				onclick="userAddOpen();">添 加</a> <a href="#"
+				class="easyui-linkbutton" iconCls="icon-edit" plain="true"
+				onclick="userModifyOpen();">修 改</a> <a href="#"
+				class="easyui-linkbutton" iconCls="icon-remove" plain="true"
+				onclick="userRemove();">删 除</a> 
+			<a href="#"
+				class="easyui-linkbutton" iconCls="icon-edit" plain="true"
+				onclick="passwordReset();">重置密码（666666）</a> 
+			<input class="easyui-textbox" type="text" id="username" name="username"></input>	
+			<a href="#"
+				class="easyui-linkbutton" iconCls="icon-search" plain="true"
+				onclick="query();">查 询</a> 
+		</div>
+	</div>
+	<!-- 添加弹出框 -->
+	<div id="dlgAdd" class="easyui-dialog" title="用户添加"
+		data-options="iconCls:'icon-save',modal:true,closed: true"
+		style="width: 300px; height: 400px; padding: 10px"
+		buttons='#add-buttons'>
+		<form id="formAdd">
+			<table cellpadding="5">
+				<tr>
+					<td>用户名:</td>
+					<td><input class="easyui-textbox" type="text" name="username"
+						data-options="required:true"></input></td>
+				</tr>
+				<!--  <tr>
+					<td>密码:</td>
+					<td><input class="easyui-textbox" type="password"
+						name="password" data-options="required:true"></input></td>
+				</tr>-->
+				<tr>
+					<td>单位:</td>
+					<td><input class="easyui-textbox" type="text" name="unit"></input></td>
+				</tr>
+				<tr>
+					<td>电话号码:</td>
+					<td><input class="easyui-textbox" type="text" name="phone"></input></td>
+				</tr>
+				<tr>
+					<td>地址:</td>
+					<td><input class="easyui-textbox" type="text" name="address"></input></td>
+
+
+				</tr>
+	    		<tr>
+	    			<td>角色:</td>
+	    			<td>
+	    				<select class="easyui-combobox" id="role" name="role" data-options="editable:false">
+						    <option value="普通用户" selected="selected">普通用户</option>						
+							<option value="管理员">管理员</option>
+						</select>
+	    			</td>
+	    		</tr>
+	    	</table>
+		</form>
+	</div>
+	<div id="add-buttons">
+		<a href="javascript:void(0)" class="easyui-linkbutton"
+			onclick="userAdd();">保 存</a>
+		<a href="javascript:void(0)" class="easyui-linkbutton"
+			onclick="javascript:$('#dlgAdd').dialog('close')">关 闭</a>
+	</div>
+	<!-- 修改弹出框 -->	
+	<div id="dlgMod" class="easyui-dialog" title="用户修改"
+		data-options="iconCls:'icon-save',modal:true,closed: true"
+		style="width:300px;height:400px;padding:10px" buttons="#mod-buttons">
+		<form id="formMod">
+			<table cellpadding="5">
+				<tr>
+					<td>用户名:</td>
+					<td><input class="easyui-textbox" type="text" name="username"
+						data-options="required:true"></input></td>
+				</tr>
+				<!--<tr>
+					<td>密码:</td>
+					<td><input class="easyui-textbox" type="password"
+						name="password" data-options="required:true"></input></td>
+				</tr> -->
+				<tr>
+					<td>单位:</td>
+					<td><input class="easyui-textbox" type="text" name="unit"></input></td>
+				</tr>
+				<tr>
+					<td>电话号码:</td>
+					<td><input class="easyui-textbox" type="text" name="phone"></input></td>
+				</tr>
+				<tr>
+					<td>地址:</td>
+					<td><input class="easyui-textbox" type="text" name="address"></input></td>
+
+
+				</tr>
+	    		<tr>
+	    			<td>角色:</td>
+	    			<td>
+	    				<select class="easyui-combobox" name="role"
+						data-options="required:true, editable:false"><option value="普通用户">普通用户</option>
+							<option value="管理员">管理员</option></select>
+	    			</td>
+	    		</tr>
+	    	</table>
+	    	<input type="hidden" name="id">
+	    	<input type="hidden" name="password">
+		</form>
+	</div>	
+	<div id="mod-buttons">
+		<a href="javascript:void(0)" class="easyui-linkbutton"
+			onclick="userModify();">保 存</a>
+		<a href="javascript:void(0)" class="easyui-linkbutton"
+			onclick="javascript:$('#dlgMod').dialog('close')">关 闭</a>
+	</div>
+	
+	
+</body>
+</html>

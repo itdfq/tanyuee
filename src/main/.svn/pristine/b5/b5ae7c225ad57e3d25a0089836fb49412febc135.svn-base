@@ -1,0 +1,39 @@
+package com.itdfq.qianduan.service.impl;
+
+import com.itdfq.qianduan.dao.UserDao;
+import com.itdfq.qianduan.model.User;
+import com.itdfq.qianduan.service.UserService;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+
+/**
+ * Created by DFQ on 2020/10/11 15:01
+ */
+
+@Service
+public class UserServiceImpl implements UserService {
+    @Resource
+    private UserDao userDao;
+    @Override
+    public User login(User user) {
+        return userDao.login(user);
+    }
+
+    @Override
+    public User resign(User user) {
+        return userDao.resign(user);
+    }
+
+    @Override
+    public User selectByRole(User user) {
+        return userDao.selectByRole(user);
+    }
+
+    @Override
+    public User selectByName(User user) {
+        return userDao.selectByName(user);
+    }
+
+
+}
