@@ -7,7 +7,7 @@
 
 
 * github地址：https://github.com/909256107/yee
-*  在线演示地址：https://121.36.77.21:8000
+*  在线演示地址：http://121.36.77.21:8000
 
 ![登录界面](https://images.gitee.com/uploads/images/2020/1123/185531_51bf255b_5323516.png "L{HHPSVL1CWVP_UT9OKES52.png")
   
